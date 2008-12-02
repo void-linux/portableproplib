@@ -4,7 +4,7 @@
 AC_PREREQ(2.52)
 
 m4_define([proplib_major_version], [0])
-m4_define([proplib_minor_version], [1])
+m4_define([proplib_minor_version], [2])
 m4_define([proplib_micro_version], [0])
 m4_define([proplib_version],
 	  [proplib_major_version.proplib_minor_version.proplib_micro_version])
@@ -42,7 +42,21 @@ AC_CONFIG_FILES([Makefile include/Makefile man/Makefile src/Makefile])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CHECK_FUNCS(memmove memset munmap strchr strtoul stroull)
-AC_CHECK_HEADERS(limits.h stddef.h fcntl.h pthread.h)
+AC_CHECK_LIB(pthread, pthread_mutex_init, pthread_ok=yes, pthread_ok=no)
+AC_CHECK_LIB(pthread, pthread_mutex_lock, pthread_ok=yes, pthread_ok=no)
+AC_CHECK_LIB(pthread, pthread_mutex_unlock, pthread_ok=yes, pthread_ok=no)
+AC_CHECK_LIB(pthread, pthread_rwlock_init, pthread_ok=yes, pthread_ok=no)
+AC_CHECK_LIB(pthread, pthread_rwlock_rdlock, pthread_ok=yes, pthread_ok=no)
+AC_CHECK_LIB(pthread, pthread_rwlock_wrlock, pthread_ok=yes, pthread_ok=no)
+AC_CHECK_LIB(pthread, pthread_rwlock_unlock, pthread_ok=yes, pthread_ok=no)
+
+if test "x$pthread_ok" = "xyes"; then
+	LIBS="$LIBS -lpthread"
+else
+	AC_MSG_ERROR(*** A POSIX threads library is required ***)
+fi
+
+AC_CHECK_HEADERS(limits.h stddef.h fcntl.h)
 
 AC_C_CONST
 AC_FUNC_MEMCMP
