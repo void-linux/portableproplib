@@ -1,2 +1,6 @@
+0.2:
+	* A bugfix from NetBSD that fixes two race conditions that could corrupt
+	  the red-black tree to store the objects.
+	* Added some more tests to configure.ac.	
 0.1:
-	Initial public release matching libprop from NetBSD 4.99.73.
+	* Initial public release matching libprop from NetBSD 4.99.73.
