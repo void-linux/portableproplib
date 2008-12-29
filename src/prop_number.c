@@ -177,11 +177,12 @@ _prop_number_externalize(struct _prop_object_externalize_context *ctx,
 	char tmpstr[32];
 
 	/*
-	 * For unsigned numbers, we output in hex.  For signed numbers,
-	 * we output in decimal.
+	 * For the record:
+	 * The original implementation used hex for signed numbers,
+	 * but we changed it to be human readable.
 	 */
 	if (pn->pn_value.pnv_is_unsigned)
-		sprintf(tmpstr, "0x%" PRIx64, pn->pn_value.pnv_unsigned);
+		sprintf(tmpstr, "%" PRIx64, pn->pn_value.pnv_unsigned);
 	else
 		sprintf(tmpstr, "%" PRIi64, pn->pn_value.pnv_signed);
 
