@@ -823,14 +823,18 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 	_prop_object_externalize_file_dirname(fname, tname);
 
 #ifdef HAVE_STRLCAT
-	otname = strlcat(tname, "/.plistXXXXXX", sizeof(tname));
+	if (strlcat(tname, "/.plistXXXXXX", sizeof(tname)) >= sizeof(pname)) {
+		errno = ENAMETOOLONG;
+		return (false);
+	}
 #else
 	otname = strncat(tname, "/.plistXXXXXX", sizeof(tname));
-#endif
+
 	if (sizeof(*otname) >= sizeof(tname)) {
 		errno = ENAMETOOLONG;
 		return (false);
 	}
+#endif	
 	if ((fd = mkstemp(tname)) == -1)
 		return (false);
 

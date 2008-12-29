@@ -41,7 +41,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile include/Makefile man/Makefile src/Makefile])
 AC_CONFIG_MACRO_DIR([m4])
 
-AC_CHECK_FUNCS(memmove memset munmap strchr strtoul stroull)
+AC_CHECK_FUNCS(memmove memset munmap strchr strtoul stroull strlcat)
 AC_CHECK_LIB(pthread, pthread_mutex_init, pthread_ok=yes, pthread_ok=no)
 AC_CHECK_LIB(pthread, pthread_mutex_lock, pthread_ok=yes, pthread_ok=no)
 AC_CHECK_LIB(pthread, pthread_mutex_unlock, pthread_ok=yes, pthread_ok=no)
