@@ -182,7 +182,7 @@ _prop_number_externalize(struct _prop_object_externalize_context *ctx,
 	 * but we changed it to be human readable.
 	 */
 	if (pn->pn_value.pnv_is_unsigned)
-		sprintf(tmpstr, "%" PRIx64, pn->pn_value.pnv_unsigned);
+		sprintf(tmpstr, "%" PRIu64, pn->pn_value.pnv_unsigned);
 	else
 		sprintf(tmpstr, "%" PRIi64, pn->pn_value.pnv_signed);
 
