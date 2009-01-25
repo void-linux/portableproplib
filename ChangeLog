@@ -2,6 +2,8 @@
 	* Add strlcat again with an autoconf check.
 	* Emit decimal numbers rather than hex when externalizing
 	  unsigned numbers.
+	* A bugfix from NetBSD that properly handles empty data nodes,
+	  i.e: <data></data>.
 	* Remove duplicated manpages from src directory.
 0.2:
 	* A bugfix from NetBSD that fixes two race conditions that
