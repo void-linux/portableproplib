@@ -539,7 +539,11 @@ _prop_data_internalize(prop_stack_t stack, prop_object_t *obj,
 	uint8_t *buf;
 	size_t len, alen;
 
-	/* We don't accept empty elements. */
+	/* 
+	 * We don't accept empty elements.
+	 * This actually only checks for the node to be <data/>
+	 * (Which actually causes another error if found.)
+	 */
 	if (ctx->poic_is_empty_element)
 		return (true);
 
@@ -595,7 +599,16 @@ _prop_data_internalize(prop_stack_t stack, prop_object_t *obj,
 		return (true);
 	}
 
-	data->pd_mutable = buf;
+	/*
+	 * Handle alternate type of empty node.
+	 * XML document could contain open/close tags, yet still be empty.
+	 */
+	if (alen == 0) {
+		_PROP_FREE(buf, M_PROP_DATA);
+		data->pd_mutable = NULL;
+	} else {
+		data->pd_mutable = buf;
+	}
 	data->pd_size = len;
 
 	*obj = data;
