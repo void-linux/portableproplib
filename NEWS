@@ -1,3 +1,7 @@
+0.3:
+	* Add strlcat again with an autoconf check.
+	* Emit decimal numbers rather than hex when externalizing unsigned
+	  numbers.
 0.2:
 	* A bugfix from NetBSD that fixes two race conditions that could corrupt
 	  the red-black tree to store the objects.

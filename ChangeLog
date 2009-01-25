@@ -1,7 +1,8 @@
 0.3:
 	* Add strlcat again with an autoconf check.
-	* Emit decimal numbers when externalizing uint32 instead
-	  of hexadecimal.
+	* Emit decimal numbers rather than hex when externalizing
+	  unsigned numbers.
+	* Remove duplicated manpages from src directory.
 0.2:
 	* A bugfix from NetBSD that fixes two race conditions that
 	  could corrupt the red-black tree to store the objects.
