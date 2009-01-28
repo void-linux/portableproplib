@@ -114,7 +114,7 @@ object type differs from the Apple XML property list format in the following
 ways:
 .Bl -bullet
 .It
-The external representation is in base 16, not base 10.
+This implementation of
 .Nm
 is able to parse base 8, base 10, and base 16
 .Sq integer
@@ -127,6 +127,19 @@ Therefore, the external representation will never be negative.
 Because floating point numbers are not supported,
 .Sq real
 elements from an Apple XML property list will not be parsed.
+.El
+.Pp
+The
+.Nm
+.Sq number
+object type differs from the NetBSD XML property list format in the following
+ways:
+.Bl -bullet
+.It
+The original NetBSD implementation is using base 16, not base 10 for the
+external representation, but portable
+.Nm
+doesn't have this difference, it is using 10 base as Apple does.
 .El
 .Pp
 In order to facilitate use of
