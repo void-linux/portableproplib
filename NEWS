@@ -1,0 +1,29 @@
+ 0.4
+-------------------------------------------------------------------------------
+ * Added support to internalize (read) and externalize (write) plist
+   files compressed with gzip(1) (by using the compatible zlib interface).
+
+   The ABI has not been touched, some new functions have been added:
+    - prop_array_externalize_to_zfile()
+    - prop_array_internalize_from_zfile()
+    - prop_dictionary_externalize_to_zfile().
+    - prop_dictionary_internalize_from_zfile().
+
+   Due to this additions, zlib is now required.
+
+ 0.3
+-------------------------------------------------------------------------------
+ * Add strlcat again with an autoconf check.
+ * Emit decimal numbers rather than hex when externalizing unsigned numbers.
+ * A bugfix from NetBSD that properly handles empty data nodes, ie
+   <data></data>.
+
+ 0.2
+-------------------------------------------------------------------------------
+ * A bugfix from NetBSD that fixes two race conditions that could corrupt
+   the red-black tree to store the objects.
+ * Added some more tests to configure.ac.
+
+ 0.1
+-------------------------------------------------------------------------------
+ * Initial public release matching libprop from NetBSD 4.99.73.
