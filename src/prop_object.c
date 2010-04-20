@@ -805,8 +805,7 @@ _prop_object_externalize_file_dirname(const char *path, char *result)
  *	and the mode set to 0666 modified by the caller's umask.
  *
  *	The 'compress' argument enables gzip (via zlib) compression
- *	for the file to be written. If zlib support is disabled it's
- *	simply ignored.
+ *	for the file to be written.
  */
 bool
 _prop_object_externalize_write_file(const char *fname, const char *xml,
@@ -845,20 +844,19 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 	if ((fd = mkstemp(tname)) == -1)
 		return (false);
 
-	/*
-	 * Always use the zlib gzip-wrapper, it is able to read from
-	 * uncompressed files as well. If the 'compress' argument is false
-	 * it will always use no compression at all.
-	 */
-	if ((gzf = gzdopen(fd, "a")) == NULL)
-		goto bad;
+	if (compress) {
+		if ((gzf = gzdopen(fd, "a")) == NULL)
+			goto bad;
 
-	if (gzsetparams(gzf, compress ? Z_BEST_COMPRESSION : Z_NO_COMPRESSION,
-	    Z_DEFAULT_STRATEGY))
-		goto bad;
+		if (gzsetparams(gzf, Z_BEST_COMPRESSION, Z_DEFAULT_STRATEGY))
+			goto bad;
 
-	if (gzwrite(gzf, xml, len) != (ssize_t)len)
-		goto bad;
+		if (gzwrite(gzf, xml, len) != (ssize_t)len)
+			goto bad;
+	} else {
+		if (write(fd, xml, len) != (ssize_t)len)
+			goto out;
+	}
 
 	if (fsync(fd) == -1)
 		goto bad;
@@ -868,7 +866,10 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 	if (fchmod(fd, 0666 & ~myumask) == -1)
 		goto bad;
 
-	(void)gzclose(gzf);
+	if (compress)
+		(void)gzclose(gzf);
+	else
+		(void)close(fd);
 	fd = -1;
 
 	if (rename(tname, fname) == -1)
@@ -878,8 +879,10 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 
  bad:
 	save_errno = errno;
-	if (gzf != NULL)
+	if (compress && gzf != NULL)
 		(void)gzclose(gzf);
+	else if (fd != -1)
+		(void)close(fd);
 	(void) unlink(tname);
 	errno = save_errno;
 	return (false);
