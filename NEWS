@@ -1,3 +1,9 @@
+ 0.4.1
+-------------------------------------------------------------------------------
+ * When externalizing a file with the _file variant, it was always writting
+   gzipped archives but without compression, this added garbage into the
+   plist files, thus not being compatible.
+
  0.4
 -------------------------------------------------------------------------------
  * Added support to internalize (read) and externalize (write) plist
