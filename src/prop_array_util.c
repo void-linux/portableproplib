@@ -38,7 +38,7 @@
  * exactly what we're doing here.
  */
 
-#include "proplib.h"
+#include <prop/proplib.h>
 #include "prop_object_impl.h"
 
 bool

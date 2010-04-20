@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "prop_bool.h"
+#include <prop/prop_bool.h>
 #include "prop_object_impl.h"
 
 struct _prop_bool {

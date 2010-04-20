@@ -54,7 +54,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "prop_array.h"
+#include <prop/prop_array.h>
 #include "prop_object_impl.h"
 #include <errno.h>
 

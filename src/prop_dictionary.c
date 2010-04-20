@@ -54,7 +54,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "proplib.h"
+#include <prop/proplib.h>
 #include "prop_object_impl.h"
 #include "prop_rb_impl.h"
 
@@ -1493,7 +1493,7 @@ prop_dictionary_internalize_from_zfile(const char *fname)
 	strm.avail_in = mf->poimf_mapsize;
 	strm.next_in = mf->poimf_xml;
 
-	/* Output buffer (decompressed) */
+	/* Output buffer (uncompressed) */
 	mf->poimf_uncomp_xml = _PROP_MALLOC(_READ_CHUNK, M_TEMP);
 	if (mf->poimf_uncomp_xml == NULL) {
 		_prop_object_internalize_unmap_file(mf);
@@ -1501,7 +1501,7 @@ prop_dictionary_internalize_from_zfile(const char *fname)
 		return NULL;
 	}
 
-	/* Inflate the input buffer and copy into 'dest' */
+	/* Inflate the input buffer and copy into 'poimf_uncomp_xml' */
 	do {
 		strm.avail_out = _READ_CHUNK;
 		strm.next_out = out;

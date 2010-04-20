@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "prop_data.h"
+#include <prop/prop_data.h>
 #include "prop_object_impl.h"
 
 #include <errno.h>

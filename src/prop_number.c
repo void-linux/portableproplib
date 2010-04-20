@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "prop_number.h"
+#include <prop/prop_number.h>
 #include "prop_object_impl.h"
 #include "prop_rb_impl.h"
 

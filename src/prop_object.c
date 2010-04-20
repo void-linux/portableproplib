@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "prop_object.h"
+#include <prop/prop_object.h>
 #include "prop_object_impl.h"
 
 #include <sys/mman.h>

@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "proplib.h"
+#include <prop/proplib.h>
 #include "prop_object_impl.h"
 
 struct _prop_ingest_context {
