@@ -855,7 +855,7 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 			goto bad;
 	} else {
 		if (write(fd, xml, len) != (ssize_t)len)
-			goto out;
+			goto bad;
 	}
 
 	if (fsync(fd) == -1)
