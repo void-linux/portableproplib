@@ -149,7 +149,6 @@ bool		_prop_object_externalize_write_file(const char *,
 
 struct _prop_object_internalize_mapped_file {
 	char *	poimf_xml;
-	char *	poimf_uncomp_xml;	/* uncompressed xml data */
 	size_t	poimf_mapsize;
 };
 

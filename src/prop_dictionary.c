@@ -1469,6 +1469,7 @@ prop_dictionary_internalize_from_zfile(const char *fname)
 	prop_dictionary_t dict;
 	z_stream strm;
 	unsigned char out[_READ_CHUNK];
+	char *uncomp_xml = NULL;
 	size_t have;
 	ssize_t totalsize = 0;
 	int rv = 0;
@@ -1489,45 +1490,52 @@ prop_dictionary_internalize_from_zfile(const char *fname)
 		_prop_object_internalize_unmap_file(mf);
 		return NULL;
 	}
-
 	strm.avail_in = mf->poimf_mapsize;
 	strm.next_in = mf->poimf_xml;
 
 	/* Output buffer (uncompressed) */
-	mf->poimf_uncomp_xml = _PROP_MALLOC(_READ_CHUNK, M_TEMP);
-	if (mf->poimf_uncomp_xml == NULL) {
-		_prop_object_internalize_unmap_file(mf);
+	uncomp_xml = _PROP_MALLOC(_READ_CHUNK, M_TEMP);
+	if (uncomp_xml == NULL) {
 		(void)inflateEnd(&strm);
+		_prop_object_internalize_unmap_file(mf);
 		return NULL;
 	}
 
-	/* Inflate the input buffer and copy into 'poimf_uncomp_xml' */
+	/* Inflate the input buffer and copy into 'uncomp_xml' */
 	do {
 		strm.avail_out = _READ_CHUNK;
 		strm.next_out = out;
 		rv = inflate(&strm, Z_NO_FLUSH);
-		_PROP_ASSERT(rv != Z_STREAM_ERROR);
 		switch (rv) {
-		case Z_NEED_DICT:
-			rv = Z_DATA_ERROR;
 		case Z_DATA_ERROR:
+			/*
+			 * Wrong compressed data or uncompressed, try
+			 * normal method as last resort.
+			 */
+			(void)inflateEnd(&strm);
+			_PROP_FREE(uncomp_xml, M_TEMP);
+			dict = prop_dictionary_internalize(mf->poimf_xml);
+			_prop_object_internalize_unmap_file(mf);
+			return dict;
+		case Z_STREAM_ERROR:
+		case Z_NEED_DICT:
 		case Z_MEM_ERROR:
-			inflateEnd(&strm);
+			(void)inflateEnd(&strm);
+			_PROP_FREE(uncomp_xml, M_TEMP);
 			_prop_object_internalize_unmap_file(mf);
 			errno = rv;
 			return NULL;
 		}
 		have = _READ_CHUNK - strm.avail_out;
 		totalsize += have;
-		mf->poimf_uncomp_xml =
-		    _PROP_REALLOC(mf->poimf_uncomp_xml, totalsize, M_TEMP);
-		memcpy(mf->poimf_uncomp_xml + totalsize - have, out, have);
+		uncomp_xml = _PROP_REALLOC(uncomp_xml, totalsize, M_TEMP);
+		memcpy(uncomp_xml + totalsize - have, out, have);
 	} while (strm.avail_out == 0);
 
 	/* we are done */
 	(void)inflateEnd(&strm);
-
-	dict = prop_dictionary_internalize(mf->poimf_uncomp_xml);
+	dict = prop_dictionary_internalize(uncomp_xml);
+	_PROP_FREE(uncomp_xml, M_TEMP);
 	_prop_object_internalize_unmap_file(mf);
 
 	return dict;

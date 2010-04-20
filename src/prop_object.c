@@ -960,7 +960,6 @@ _prop_object_internalize_unmap_file(
 
 	(void) madvise(mf->poimf_xml, mf->poimf_mapsize, MADV_DONTNEED);
 	(void) munmap(mf->poimf_xml, mf->poimf_mapsize);
-	_PROP_FREE(mf->poimf_uncomp_xml, M_TEMP);
 	_PROP_FREE(mf, M_TEMP);
 }
 
