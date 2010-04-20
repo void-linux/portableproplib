@@ -845,6 +845,11 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 	if ((fd = mkstemp(tname)) == -1)
 		return (false);
 
+	/*
+	 * Always use the zlib gzip-wrapper, it is able to read from
+	 * uncompressed files as well. If the 'compress' argument is false
+	 * it will always use no compression at all.
+	 */
 	if ((gzf = gzdopen(fd, "a")) == NULL)
 		goto bad;
 
