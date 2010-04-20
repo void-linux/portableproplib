@@ -809,7 +809,7 @@ _prop_object_externalize_file_dirname(const char *path, char *result)
  */
 bool
 _prop_object_externalize_write_file(const char *fname, const char *xml,
-    size_t len, bool compress)
+    size_t len, bool do_compress)
 {
 	gzFile *gzf = NULL;
 	char tname[PATH_MAX], *otname;
@@ -844,7 +844,7 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 	if ((fd = mkstemp(tname)) == -1)
 		return (false);
 
-	if (compress) {
+	if (do_compress) {
 		if ((gzf = gzdopen(fd, "a")) == NULL)
 			goto bad;
 
@@ -866,7 +866,7 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 	if (fchmod(fd, 0666 & ~myumask) == -1)
 		goto bad;
 
-	if (compress)
+	if (do_compress)
 		(void)gzclose(gzf);
 	else
 		(void)close(fd);
@@ -879,7 +879,7 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 
  bad:
 	save_errno = errno;
-	if (compress && gzf != NULL)
+	if (do_compress && gzf != NULL)
 		(void)gzclose(gzf);
 	else if (fd != -1)
 		(void)close(fd);
