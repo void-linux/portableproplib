@@ -9,7 +9,8 @@
     - prop_dictionary_externalize_to_zfile().
     - prop_dictionary_internalize_from_zfile().
 
-   Due to this additions, zlib is now required.
+   Due to this additions, zlib is now required. The _zfile() variants are
+   able to internalize/externalize from uncompressed plist files as well.
 
  0.3
 -------------------------------------------------------------------------------
