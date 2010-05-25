@@ -73,10 +73,15 @@ static bool rb_tree_check_node(const struct rb_tree *, const struct rb_node *,
  * cause a fault.
  */
 static const struct rb_node sentinel_node = {
-	.rb_nodes = { RBUNCONST(&sentinel_node),
-		      RBUNCONST(&sentinel_node),
-		      NULL },
-	.rb_u = { .u_s = { .s_sentinel = 1 } },
+	{ RBUNCONST(&sentinel_node),
+	  RBUNCONST(&sentinel_node),
+	  NULL },
+#if BYTE_ORDER == LITTLE_ENDIAN
+	{ { 0, 0, 0, 1 } }
+#endif
+#if BYTE_ORDER == BIG_ENDIAN
+	{ { 1, 0, 0, 0 } }
+#endif
 };
 
 void
