@@ -4,7 +4,7 @@
 AC_PREREQ(2.52)
 
 m4_define([proplib_major_version], [0])
-m4_define([proplib_minor_version], [4])
+m4_define([proplib_minor_version], [5])
 m4_define([proplib_micro_version], [0])
 m4_define([proplib_version],
 	  [proplib_major_version.proplib_minor_version.proplib_micro_version])
@@ -23,7 +23,7 @@ LT_CURRENT=0
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=8
+LT_REVISION=9
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -35,8 +35,12 @@ AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 
 AM_INIT_AUTOMAKE
-AC_PROG_CC
+AC_PROG_CC_C99
+if test "$ac_cv_prog_cc_c99" = "no"; then
+	AC_MSG_ERROR(*** A working C99 compiler is required, aborting ***)
+fi
 AC_PROG_LIBTOOL
+
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile
 		 include/Makefile
@@ -69,5 +73,7 @@ AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 AC_TYPE_UINT64_T
 AC_TYPE_UINT8_T
+
+CC_CHECK_CFLAGS_APPEND([-pipe -Werror -Wall -Wextra -Wvla -Wno-overlength-strings -Wunsafe-loop-optimizations -Wundef -Wformat=2 -Wsign-compare -Wformat-security -Wmissing-include-dirs -Wformat-nonliteral -Wold-style-definition -Wpointer-arith -Winit-self -Wdeclaration-after-statement -Wfloat-equal -Wmissing-prototypes -Wstrict-prototypes -Wredundant-decls -Wmissing-declarations -Wmissing-noreturn -Wshadow -Wendif-labels -Wcast-align -Wstrict-aliasing -Wwrite-strings -Wno-unused-parameter -Wp,-D_FORTIFY_SOURCE=2 -fstack-protector-all])
 
 AC_OUTPUT

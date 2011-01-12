@@ -14,9 +14,9 @@ XML document whose format is described by the following DTD:
 
 --
 
-This proplib version is the same version than is available on NetBSD, but
-with the exception that NetBSD specific code has been removed and
-it has been converted to be built throught the GNU autotools.
+This proplib version is the same version than is available on NetBSD, 
+with the exception that it has been converted to be built through the
+GNU autotools.
 
 Since version 0.4, the API has diverged a bit, notably this version supports
 reading and writting gzipped compressed plist files thanks to zlib
