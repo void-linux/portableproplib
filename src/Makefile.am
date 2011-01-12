@@ -3,8 +3,9 @@
 #
 AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)
 
+noinst_HEADERS = prop_stack.h prop_rb_impl.h prop_object_impl.h
 SYMFILE = libprop.sym
-EXTRA_DIST = $(SYMFILE)
+EXTRA_DIST = $(SYMFILE) $(noinst_HEADERS)
 
 lib_LTLIBRARIES = libprop.la
 libprop_la_SOURCES = prop_array.c prop_array_util.c prop_bool.c prop_data.c \
