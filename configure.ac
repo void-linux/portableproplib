@@ -46,7 +46,8 @@ AC_CONFIG_FILES([Makefile
 		 include/Makefile
 		 include/prop/Makefile
 		 man/Makefile
-		 src/Makefile])
+		 src/Makefile
+		 proplib.pc])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CHECK_HEADERS(limits.h stddef.h fcntl.h)
