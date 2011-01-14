@@ -196,8 +196,9 @@ _prop_number_externalize(struct _prop_object_externalize_context *ctx,
 
 	/*
 	 * For the record:
-	 * the original NetBSD implementation used hexadecimal for signed numbers,
-	 * but in the portable proplib we changed it to be human readable.
+	 * the original NetBSD implementation used hexadecimal for unsigned
+	 * numbers, but in the portable proplib we changed it to be human
+	 * readable (base 10).
 	 */
 	if (pn->pn_value.pnv_is_unsigned)
 		sprintf(tmpstr, "%" PRIu64, pn->pn_value.pnv_unsigned);
