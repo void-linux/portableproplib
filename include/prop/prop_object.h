@@ -32,7 +32,7 @@
 #ifndef _PROPLIB_PROP_OBJECT_H_
 #define	_PROPLIB_PROP_OBJECT_H_
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 typedef void *prop_object_t;

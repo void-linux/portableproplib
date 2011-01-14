@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "prop_string.h"
+#include <prop/prop_string.h>
 #include "prop_object_impl.h"
 
 struct _prop_string {

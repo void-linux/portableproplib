@@ -1,4 +1,4 @@
-/*	$NetBSD: proplib.h,v 1.6 2008/04/28 20:22:51 martin Exp $	*/
+/*	$NetBSD: prop_string.h,v 1.3 2008/04/28 20:22:51 martin Exp $	*/
 
 /*-
  * Copyright (c) 2006 The NetBSD Foundation, Inc.
@@ -29,15 +29,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PROPLIB_PROPLIB_H_
-#define	_PROPLIB_PROPLIB_H_
+#ifndef _PROPLIB_PROP_STRING_H_
+#define	_PROPLIB_PROP_STRING_H_
 
-#include "prop_array.h"
-#include "prop_bool.h"
-#include "prop_data.h"
-#include "prop_dictionary.h"
-#include "prop_number.h"
-#include "prop_string.h"
-#include "prop_ingest.h"
+#include <stdint.h>
+#include <prop/prop_object.h>
+#include <sys/types.h>
 
-#endif /* _PROPLIB_PROPLIB_H_ */
+typedef struct _prop_string *prop_string_t;
+
+__BEGIN_DECLS
+prop_string_t	prop_string_create(void);
+prop_string_t	prop_string_create_cstring(const char *);
+prop_string_t	prop_string_create_cstring_nocopy(const char *);
+
+prop_string_t	prop_string_copy(prop_string_t);
+prop_string_t	prop_string_copy_mutable(prop_string_t);
+
+size_t		prop_string_size(prop_string_t);
+bool		prop_string_mutable(prop_string_t);
+
+char *		prop_string_cstring(prop_string_t);
+const char *	prop_string_cstring_nocopy(prop_string_t);
+
+bool		prop_string_append(prop_string_t, prop_string_t);
+bool		prop_string_append_cstring(prop_string_t, const char *);
+
+bool		prop_string_equals(prop_string_t, prop_string_t);
+bool		prop_string_equals_cstring(prop_string_t, const char *);
+__END_DECLS
+
+#endif /* _PROPLIB_PROP_STRING_H_ */

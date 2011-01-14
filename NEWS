@@ -1,12 +1,59 @@
-0.3:
-	* Add strlcat again with an autoconf check.
-	* Emit decimal numbers rather than hex when externalizing unsigned
-	  numbers.
-	* A bugfix from NetBSD that properly handles empty data nodes,
-	  i.e: <data></data>.
-0.2:
-	* A bugfix from NetBSD that fixes two race conditions that could corrupt
-	  the red-black tree to store the objects.
-	* Added some more tests to configure.ac.	
-0.1:
-	* Initial public release matching libprop from NetBSD 4.99.73.
+
+0.5.1
+-------------------------------------------------------------------------------
+ * Added pkg-config support and install a proplib.pc file.
+ 
+0.5.0
+-------------------------------------------------------------------------------
+ * Synced proplib code with NetBSD HEAD, which replaces the red-black tree
+   implementation and checks for NULL pointers passed in to the _dict/_array
+   functions.
+
+ * The _zfile functions in the API are now encapsulated into its own file,
+   that way upstream changes are merged easily.
+
+ * The list of public API exported symbols is now handled via libtool's
+   -exported-symbols option so that local symbols don't pollute the API.
+
+ * Explicitly require a C99 compiler. Don't want to waste time in non C99
+   compilers.
+
+ * Build with Stack Smashing Protection if supported by the compiler, and
+   a bunch of compiler warnings.
+
+0.4.1
+-------------------------------------------------------------------------------
+ * When externalizing a file with the _file variant, it was always writting
+   gzipped archives but without compression, this added garbage into the
+   plist files, thus not being compatible.
+
+0.4
+-------------------------------------------------------------------------------
+ * Added support to internalize (read) and externalize (write) plist
+   files compressed with gzip(1) (by using the compatible zlib interface).
+
+   The ABI has not been touched, some new functions have been added:
+    - prop_array_externalize_to_zfile()
+    - prop_array_internalize_from_zfile()
+    - prop_dictionary_externalize_to_zfile().
+    - prop_dictionary_internalize_from_zfile().
+
+   Due to this additions, zlib is now required. The _zfile() variants are
+   able to internalize/externalize from uncompressed plist files as well.
+
+0.3
+-------------------------------------------------------------------------------
+ * Add strlcat again with an autoconf check.
+ * Emit decimal numbers rather than hex when externalizing unsigned numbers.
+ * A bugfix from NetBSD that properly handles empty data nodes, ie
+   <data></data>.
+
+0.2
+-------------------------------------------------------------------------------
+ * A bugfix from NetBSD that fixes two race conditions that could corrupt
+   the red-black tree to store the objects.
+ * Added some more tests to configure.ac.
+
+0.1
+-------------------------------------------------------------------------------
+ * Initial public release matching libprop from NetBSD 4.99.73.

@@ -29,9 +29,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "prop_array.h"
+#include <prop/prop_array.h>
 #include "prop_object_impl.h"
+
+#if !defined(_KERNEL) && !defined(_STANDALONE)
 #include <errno.h>
+#define __unused	/* empty */
+#endif
 
 struct _prop_array {
 	struct _prop_object	pa_obj;
@@ -337,7 +341,7 @@ static prop_object_t
 _prop_array_iterator_next_object(void *v)
 {
 	struct _prop_array_iterator *pai = v;
-	prop_array_t pa = pai->pai_base.pi_obj;
+	prop_array_t pa __unused = pai->pai_base.pi_obj;
 	prop_object_t po;
 
 	_PROP_ASSERT(prop_object_is_array(pa));
@@ -364,7 +368,7 @@ static void
 _prop_array_iterator_reset(void *v)
 {
 	struct _prop_array_iterator *pai = v;
-	prop_array_t pa = pai->pai_base.pi_obj;
+	prop_array_t pa __unused = pai->pai_base.pi_obj;
 
 	_PROP_ASSERT(prop_object_is_array(pa));
 
@@ -862,6 +866,7 @@ prop_array_internalize(const char *xml)
 	return _prop_generic_internalize(xml, "array");
 }
 
+#if !defined(_KERNEL) && !defined(_STANDALONE)
 /*
  * prop_array_externalize_to_file --
  *	Externalize an array to the specified file.
@@ -876,7 +881,7 @@ prop_array_externalize_to_file(prop_array_t array, const char *fname)
 	xml = prop_array_externalize(array);
 	if (xml == NULL)
 		return (false);
-	rv = _prop_object_externalize_write_file(fname, xml, strlen(xml));
+	rv = _prop_object_externalize_write_file(fname, xml, strlen(xml), false);
 	if (rv == false)
 		save_errno = errno;
 	_PROP_FREE(xml, M_TEMP);
@@ -904,3 +909,4 @@ prop_array_internalize_from_file(const char *fname)
 
 	return (array);
 }
+#endif /* _KERNEL && !_STANDALONE */

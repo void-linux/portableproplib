@@ -32,8 +32,9 @@
 #ifndef _PROP_STACK_H
 #define _PROP_STACK_H
 
-#include "queue.h"
-#include "prop_object.h"
+#include <queue.h>
+#include <prop/prop_object.h>
+#include <sys/types.h>
 
 struct _prop_stack_intern_elem {
 	prop_object_t object;

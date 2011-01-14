@@ -1,4 +1,4 @@
-/*	$NetBSD: prop_number.h,v 1.6 2008/04/28 20:22:51 martin Exp $	*/
+/*	$NetBSD: prop_bool.h,v 1.4 2008/04/28 20:22:51 martin Exp $	*/
 
 /*-
  * Copyright (c) 2006 The NetBSD Foundation, Inc.
@@ -29,29 +29,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PROPLIB_PROP_NUMBER_H_
-#define	_PROPLIB_PROP_NUMBER_H_
+#ifndef _PROPLIB_PROP_BOOL_H_
+#define	_PROPLIB_PROP_BOOL_H_
 
-#include <stdint.h>
-#include "prop_object.h"
+#include <stdbool.h>
+#include <prop/prop_object.h>
 
-typedef struct _prop_number *prop_number_t;
+typedef struct _prop_bool *prop_bool_t;
 
 __BEGIN_DECLS
-prop_number_t	prop_number_create_integer(int64_t);
-prop_number_t	prop_number_create_unsigned_integer(uint64_t);
+prop_bool_t	prop_bool_create(bool);
+prop_bool_t	prop_bool_copy(prop_bool_t);
 
-prop_number_t	prop_number_copy(prop_number_t);
+bool		prop_bool_true(prop_bool_t);
 
-int		prop_number_size(prop_number_t);
-bool		prop_number_unsigned(prop_number_t);
-
-int64_t		prop_number_integer_value(prop_number_t);
-uint64_t	prop_number_unsigned_integer_value(prop_number_t);
-
-bool		prop_number_equals(prop_number_t, prop_number_t);
-bool		prop_number_equals_integer(prop_number_t, int64_t);
-bool		prop_number_equals_unsigned_integer(prop_number_t, uint64_t);
+bool		prop_bool_equals(prop_bool_t, prop_bool_t);
 __END_DECLS
 
-#endif /* _PROPLIB_PROP_NUMBER_H_ */
+#endif /* _PROPLIB_PROP_BOOL_H_ */

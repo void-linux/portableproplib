@@ -1,4 +1,4 @@
-/*	$NetBSD: prop_string.h,v 1.3 2008/04/28 20:22:51 martin Exp $	*/
+/*	$NetBSD: prop_number.h,v 1.6 2008/04/28 20:22:51 martin Exp $	*/
 
 /*-
  * Copyright (c) 2006 The NetBSD Foundation, Inc.
@@ -29,32 +29,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PROPLIB_PROP_STRING_H_
-#define	_PROPLIB_PROP_STRING_H_
+#ifndef _PROPLIB_PROP_NUMBER_H_
+#define	_PROPLIB_PROP_NUMBER_H_
 
-#include "prop_object.h"
+#include <stdint.h>
+#include <prop/prop_object.h>
 
-typedef struct _prop_string *prop_string_t;
+typedef struct _prop_number *prop_number_t;
 
 __BEGIN_DECLS
-prop_string_t	prop_string_create(void);
-prop_string_t	prop_string_create_cstring(const char *);
-prop_string_t	prop_string_create_cstring_nocopy(const char *);
+prop_number_t	prop_number_create_integer(int64_t);
+prop_number_t	prop_number_create_unsigned_integer(uint64_t);
 
-prop_string_t	prop_string_copy(prop_string_t);
-prop_string_t	prop_string_copy_mutable(prop_string_t);
+prop_number_t	prop_number_copy(prop_number_t);
 
-size_t		prop_string_size(prop_string_t);
-bool		prop_string_mutable(prop_string_t);
+int		prop_number_size(prop_number_t);
+bool		prop_number_unsigned(prop_number_t);
 
-char *		prop_string_cstring(prop_string_t);
-const char *	prop_string_cstring_nocopy(prop_string_t);
+int64_t		prop_number_integer_value(prop_number_t);
+uint64_t	prop_number_unsigned_integer_value(prop_number_t);
 
-bool		prop_string_append(prop_string_t, prop_string_t);
-bool		prop_string_append_cstring(prop_string_t, const char *);
-
-bool		prop_string_equals(prop_string_t, prop_string_t);
-bool		prop_string_equals_cstring(prop_string_t, const char *);
+bool		prop_number_equals(prop_number_t, prop_number_t);
+bool		prop_number_equals_integer(prop_number_t, int64_t);
+bool		prop_number_equals_unsigned_integer(prop_number_t, uint64_t);
 __END_DECLS
 
-#endif /* _PROPLIB_PROP_STRING_H_ */
+#endif /* _PROPLIB_PROP_NUMBER_H_ */

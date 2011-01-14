@@ -1,4 +1,4 @@
-/*	$NetBSD: prop_data.h,v 1.3 2008/04/28 20:22:51 martin Exp $	*/
+/*	$NetBSD: proplib.h,v 1.6 2008/04/28 20:22:51 martin Exp $	*/
 
 /*-
  * Copyright (c) 2006 The NetBSD Foundation, Inc.
@@ -29,26 +29,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PROPLIB_PROP_DATA_H_
-#define	_PROPLIB_PROP_DATA_H_
+#ifndef _PROPLIB_PROPLIB_H_
+#define	_PROPLIB_PROPLIB_H_
 
-#include "prop_object.h"
+#include <stdint.h>
 
-typedef struct _prop_data *prop_data_t;
+#include <prop/prop_array.h>
+#include <prop/prop_bool.h>
+#include <prop/prop_data.h>
+#include <prop/prop_dictionary.h>
+#include <prop/prop_number.h>
+#include <prop/prop_string.h>
+#include <prop/prop_ingest.h>
 
-__BEGIN_DECLS
-prop_data_t	prop_data_create_data(const void *, size_t);
-prop_data_t	prop_data_create_data_nocopy(const void *, size_t);
-
-prop_data_t	prop_data_copy(prop_data_t);
-
-size_t		prop_data_size(prop_data_t);
-
-void *		prop_data_data(prop_data_t);
-const void *	prop_data_data_nocopy(prop_data_t);
-
-bool		prop_data_equals(prop_data_t, prop_data_t);
-bool		prop_data_equals_data(prop_data_t, const void *, size_t);
-__END_DECLS
-
-#endif /* _PROPLIB_PROP_DATA_H_ */
+#endif /* _PROPLIB_PROPLIB_H_ */

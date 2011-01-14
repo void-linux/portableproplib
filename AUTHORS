@@ -1,5 +1,5 @@
 The NetBSD's proplib implementation was written by Jason R. Thorpe.
 
-Portable proplib is maintained by Juan Romero Pardines <xtraeme@gmail.com>
-and Adam Hoka <adam.hoka@gmail.com>. This includes portability changes,
-bugfixing and additional functionality.
+The Portable proplib is maintained by Juan Romero Pardines <xtraeme@gmail.com>
+and Adam Hoka <adam.hoka@gmail.com> as contributor. This includes portability
+changes, bugfixing and additional functionality.

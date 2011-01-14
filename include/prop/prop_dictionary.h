@@ -32,7 +32,9 @@
 #ifndef _PROPLIB_PROP_DICTIONARY_H_
 #define	_PROPLIB_PROP_DICTIONARY_H_
 
-#include "prop_object.h"
+#include <stdint.h>
+#include <prop/prop_object.h>
+#include <prop/prop_array.h>
 
 typedef struct _prop_dictionary *prop_dictionary_t;
 typedef struct _prop_dictionary_keysym *prop_dictionary_keysym_t;
@@ -74,7 +76,10 @@ prop_dictionary_t prop_dictionary_internalize(const char *);
 
 bool		prop_dictionary_externalize_to_file(prop_dictionary_t,
 						    const char *);
+bool		prop_dictionary_externalize_to_zfile(prop_dictionary_t,
+						     const char *);
 prop_dictionary_t prop_dictionary_internalize_from_file(const char *);
+prop_dictionary_t prop_dictionary_internalize_from_zfile(const char *);
 
 const char *	prop_dictionary_keysym_cstring_nocopy(prop_dictionary_keysym_t);
 

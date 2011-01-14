@@ -33,7 +33,7 @@
 #define	_PROPLIB_PROP_ARRAY_H_
 
 #include <stdint.h>
-#include "prop_object.h"
+#include <prop/prop_object.h>
 
 typedef struct _prop_array *prop_array_t;
 
@@ -64,7 +64,9 @@ char *		prop_array_externalize(prop_array_t);
 prop_array_t	prop_array_internalize(const char *);
 
 bool		prop_array_externalize_to_file(prop_array_t, const char *);
+bool		prop_array_externalize_to_zfile(prop_array_t, const char *);
 prop_array_t	prop_array_internalize_from_file(const char *);
+prop_array_t	prop_array_internalize_from_zfile(const char *);
 
 /*
  * Utility routines to make it more convenient to work with values

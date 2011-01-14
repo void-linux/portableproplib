@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "prop_object.h"
+#include <prop/prop_object.h>
 #include "prop_object_impl.h"
 
 #include <sys/mman.h>
@@ -38,6 +38,8 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <unistd.h>
+
+#include <zlib.h>
 
 /*
  * _prop_object_init --
@@ -801,11 +803,15 @@ _prop_object_externalize_file_dirname(const char *path, char *result)
  *	Write an externalized dictionary to the specified file.
  *	The file is written atomically from the caller's perspective,
  *	and the mode set to 0666 modified by the caller's umask.
+ *
+ *	The 'compress' argument enables gzip (via zlib) compression
+ *	for the file to be written.
  */
 bool
 _prop_object_externalize_write_file(const char *fname, const char *xml,
-    size_t len)
+    size_t len, bool do_compress)
 {
+	gzFile *gzf = NULL;
 	char tname[PATH_MAX], *otname;
 	int fd;
 	int save_errno;
@@ -838,8 +844,19 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 	if ((fd = mkstemp(tname)) == -1)
 		return (false);
 
-	if (write(fd, xml, len) != (ssize_t)len)
-		goto bad;
+	if (do_compress) {
+		if ((gzf = gzdopen(fd, "a")) == NULL)
+			goto bad;
+
+		if (gzsetparams(gzf, Z_BEST_COMPRESSION, Z_DEFAULT_STRATEGY))
+			goto bad;
+
+		if (gzwrite(gzf, xml, len) != (ssize_t)len)
+			goto bad;
+	} else {
+		if (write(fd, xml, len) != (ssize_t)len)
+			goto bad;
+	}
 
 	if (fsync(fd) == -1)
 		goto bad;
@@ -849,7 +866,10 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 	if (fchmod(fd, 0666 & ~myumask) == -1)
 		goto bad;
 
-	(void) close(fd);
+	if (do_compress)
+		(void)gzclose(gzf);
+	else
+		(void)close(fd);
 	fd = -1;
 
 	if (rename(tname, fname) == -1)
@@ -859,8 +879,10 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 
  bad:
 	save_errno = errno;
-	if (fd != -1)
-		(void) close(fd);
+	if (do_compress && gzf != NULL)
+		(void)gzclose(gzf);
+	else if (fd != -1)
+		(void)close(fd);
 	(void) unlink(tname);
 	errno = save_errno;
 	return (false);
@@ -896,7 +918,7 @@ _prop_object_internalize_map_file(const char *fname)
 		return (NULL);
 	}
 	mf->poimf_mapsize = ((size_t)sb.st_size + pgmask) & ~pgmask;
-	if (mf->poimf_mapsize < sb.st_size) {
+	if (mf->poimf_mapsize < (size_t)sb.st_size) {
 		(void) close(fd);
 		_PROP_FREE(mf, M_TEMP);
 		return (NULL);

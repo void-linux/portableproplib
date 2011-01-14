@@ -1,4 +1,4 @@
-/*	$NetBSD: prop_dictionary.c,v 1.33 2008/11/30 00:17:07 haad Exp $	*/
+/*	$NetBSD: prop_dictionary.c,v 1.36 2010/09/24 22:51:52 rmind Exp $	*/
 
 /*-
  * Copyright (c) 2006, 2007 The NetBSD Foundation, Inc.
@@ -29,11 +29,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "proplib.h"
+#include <prop/prop_array.h>
+#include <prop/prop_dictionary.h>
+#include <prop/prop_string.h>
 #include "prop_object_impl.h"
 #include "prop_rb_impl.h"
 
+#if !defined(_KERNEL) && !defined(_STANDALONE)
 #include <errno.h>
+#define __unused	/* empty */
+#endif
 
 /*
  * We implement these like arrays, but we keep them sorted by key.
@@ -61,10 +66,6 @@ struct _prop_dictionary_keysym {
 	char 				pdk_key[1];
 	/* actually variable length */
 };
-
-#define	RBNODE_TO_PDK(n)						\
-	((struct _prop_dictionary_keysym *)				\
-	 ((uintptr_t)n - offsetof(struct _prop_dictionary_keysym, pdk_link)))
 
 	/* pdk_key[1] takes care of the NUL */
 #define	PDK_SIZE_16		(sizeof(struct _prop_dictionary_keysym) + 16)
@@ -172,34 +173,48 @@ struct _prop_dictionary_iterator {
  */
 
 static int
-_prop_dict_keysym_rb_compare_nodes(const struct rb_node *n1,
-				   const struct rb_node *n2)
+/*ARGSUSED*/
+_prop_dict_keysym_rb_compare_nodes(void *ctx __unused,
+				   const void *n1, const void *n2)
 {
-	const prop_dictionary_keysym_t pdk1 = RBNODE_TO_PDK(n1);
-	const prop_dictionary_keysym_t pdk2 = RBNODE_TO_PDK(n2);
+	const struct _prop_dictionary_keysym *pdk1 = n1;
+	const struct _prop_dictionary_keysym *pdk2 = n2;
 
-	return (strcmp(pdk1->pdk_key, pdk2->pdk_key));
+	return strcmp(pdk1->pdk_key, pdk2->pdk_key);
 }
 
 static int
-_prop_dict_keysym_rb_compare_key(const struct rb_node *n,
-				 const void *v)
+/*ARGSUSED*/
+_prop_dict_keysym_rb_compare_key(void *ctx __unused,
+				 const void *n, const void *v)
 {
-	const prop_dictionary_keysym_t pdk = RBNODE_TO_PDK(n);
+	const struct _prop_dictionary_keysym *pdk = n;
 	const char *cp = v;
 
-	return (strcmp(pdk->pdk_key, cp));
+	return strcmp(pdk->pdk_key, cp);
 }
 
-static const struct rb_tree_ops _prop_dict_keysym_rb_tree_ops = {
+static const rb_tree_ops_t _prop_dict_keysym_rb_tree_ops = {
 	.rbto_compare_nodes = _prop_dict_keysym_rb_compare_nodes,
-	.rbto_compare_key   = _prop_dict_keysym_rb_compare_key,
+	.rbto_compare_key = _prop_dict_keysym_rb_compare_key,
+	.rbto_node_offset = offsetof(struct _prop_dictionary_keysym, pdk_link),
+	.rbto_context = NULL
 };
 
 static struct rb_tree _prop_dict_keysym_tree;
-static bool _prop_dict_keysym_tree_initialized;
 
+_PROP_ONCE_DECL(_prop_dict_init_once)
 _PROP_MUTEX_DECL_STATIC(_prop_dict_keysym_tree_mutex)
+
+static int
+_prop_dict_init(void)
+{
+
+	_PROP_MUTEX_INIT(_prop_dict_keysym_tree_mutex);
+	_prop_rb_tree_init(&_prop_dict_keysym_tree,
+			   &_prop_dict_keysym_rb_tree_ops);
+	return 0;
+}
 
 static void
 _prop_dict_keysym_put(prop_dictionary_keysym_t pdk)
@@ -221,7 +236,7 @@ _prop_dict_keysym_free(prop_stack_t stack, prop_object_t *obj)
 {
 	prop_dictionary_keysym_t pdk = *obj;
 
-	_prop_rb_tree_remove_node(&_prop_dict_keysym_tree, &pdk->pdk_link);
+	_prop_rb_tree_remove_node(&_prop_dict_keysym_tree, pdk);
 	_prop_dict_keysym_put(pdk);
 
 	return _PROP_OBJECT_FREE_DONE;
@@ -268,28 +283,21 @@ _prop_dict_keysym_equals(prop_object_t v1, prop_object_t v2,
 static prop_dictionary_keysym_t
 _prop_dict_keysym_alloc(const char *key)
 {
-	prop_dictionary_keysym_t opdk, pdk;
-	const struct rb_node *n;
+	prop_dictionary_keysym_t opdk, pdk, rpdk;
 	size_t size;
-	bool rv;
+
+	_PROP_ONCE_RUN(_prop_dict_init_once, _prop_dict_init);
 
 	/*
 	 * Check to see if this already exists in the tree.  If it does,
 	 * we just retain it and return it.
 	 */
 	_PROP_MUTEX_LOCK(_prop_dict_keysym_tree_mutex);
-	if (! _prop_dict_keysym_tree_initialized) {
-		_prop_rb_tree_init(&_prop_dict_keysym_tree,
-				   &_prop_dict_keysym_rb_tree_ops);
-		_prop_dict_keysym_tree_initialized = true;
-	} else {
-		n = _prop_rb_tree_find(&_prop_dict_keysym_tree, key);
-		if (n != NULL) {
-			opdk = RBNODE_TO_PDK(n);
-			prop_object_retain(opdk);
-			_PROP_MUTEX_UNLOCK(_prop_dict_keysym_tree_mutex);
-			return (opdk);
-		}
+	opdk = _prop_rb_tree_find(&_prop_dict_keysym_tree, key);
+	if (opdk != NULL) {
+		prop_object_retain(opdk);
+		_PROP_MUTEX_UNLOCK(_prop_dict_keysym_tree_mutex);
+		return (opdk);
 	}
 	_PROP_MUTEX_UNLOCK(_prop_dict_keysym_tree_mutex);
 
@@ -321,16 +329,15 @@ _prop_dict_keysym_alloc(const char *key)
 	 * we have to check again if it is in the tree.
 	 */
 	_PROP_MUTEX_LOCK(_prop_dict_keysym_tree_mutex);
-	n = _prop_rb_tree_find(&_prop_dict_keysym_tree, key);
-	if (n != NULL) {
-		opdk = RBNODE_TO_PDK(n);
+	opdk = _prop_rb_tree_find(&_prop_dict_keysym_tree, key);
+	if (opdk != NULL) {
 		prop_object_retain(opdk);
 		_PROP_MUTEX_UNLOCK(_prop_dict_keysym_tree_mutex);
 		_prop_dict_keysym_put(pdk);
 		return (opdk);
 	}
-	rv = _prop_rb_tree_insert_node(&_prop_dict_keysym_tree, &pdk->pdk_link);
-	_PROP_ASSERT(rv == true);
+	rpdk = _prop_rb_tree_insert_node(&_prop_dict_keysym_tree, pdk);
+	_PROP_ASSERT(rpdk == pdk);
 	_PROP_MUTEX_UNLOCK(_prop_dict_keysym_tree_mutex);
 	return (pdk);
 }
@@ -390,6 +397,9 @@ _prop_dictionary_free(prop_stack_t stack, prop_object_t *obj)
 static void
 _prop_dictionary_lock(void)
 {
+
+	/* XXX: once necessary or paranoia? */
+	_PROP_ONCE_RUN(_prop_dict_init_once, _prop_dict_init);
 	_PROP_MUTEX_LOCK(_prop_dict_keysym_tree_mutex);
 }
 
@@ -619,7 +629,7 @@ static prop_object_t
 _prop_dictionary_iterator_next_object(void *v)
 {
 	struct _prop_dictionary_iterator *pdi = v;
-	prop_dictionary_t pd = pdi->pdi_base.pi_obj;
+	prop_dictionary_t pd __unused = pdi->pdi_base.pi_obj;
 	prop_dictionary_keysym_t pdk;
 
 	_PROP_ASSERT(prop_object_is_dictionary(pd));
@@ -646,7 +656,7 @@ static void
 _prop_dictionary_iterator_reset(void *v)
 {
 	struct _prop_dictionary_iterator *pdi = v;
-	prop_dictionary_t pd = pdi->pdi_base.pi_obj;
+	prop_dictionary_t pd __unused = pdi->pdi_base.pi_obj;
 
 	_PROP_RWLOCK_RDLOCK(pd->pd_rwlock);
 	_prop_dictionary_iterator_reset_locked(pdi);
@@ -923,7 +933,10 @@ _prop_dictionary_get(prop_dictionary_t pd, const char *key, bool locked)
 prop_object_t
 prop_dictionary_get(prop_dictionary_t pd, const char *key)
 {
-	prop_object_t po;
+	prop_object_t po = NULL;
+
+	if (! prop_object_is_dictionary(pd))
+		return (NULL);
 
 	_PROP_RWLOCK_RDLOCK(pd->pd_rwlock);
 	po = _prop_dictionary_get(pd, key, true);
@@ -1362,6 +1375,7 @@ prop_dictionary_internalize(const char *xml)
 	return _prop_generic_internalize(xml, "dict");
 }
 
+#if !defined(_KERNEL) && !defined(_STANDALONE)
 /*
  * prop_dictionary_externalize_to_file --
  *	Externalize a dictionary to the specified file.
@@ -1376,7 +1390,8 @@ prop_dictionary_externalize_to_file(prop_dictionary_t dict, const char *fname)
 	xml = prop_dictionary_externalize(dict);
 	if (xml == NULL)
 		return (false);
-	rv = _prop_object_externalize_write_file(fname, xml, strlen(xml));
+	rv = _prop_object_externalize_write_file(fname, xml, strlen(xml),
+	    false);
 	if (rv == false)
 		save_errno = errno;
 	_PROP_FREE(xml, M_TEMP);
@@ -1404,3 +1419,4 @@ prop_dictionary_internalize_from_file(const char *fname)
 
 	return (dict);
 }
+#endif /* !_KERNEL && !_STANDALONE */
