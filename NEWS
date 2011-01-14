@@ -2,7 +2,10 @@
 0.5.1
 -------------------------------------------------------------------------------
  * Added pkg-config support and install a proplib.pc file.
- 
+
+ * Merged stuff from old subversion repo, that re-added the change to emit
+   base 10 rather than base 16 for unsigned numbers contributed by Adam Hoka.
+  
 0.5.0
 -------------------------------------------------------------------------------
  * Synced proplib code with NetBSD HEAD, which replaces the red-black tree
