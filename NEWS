@@ -1,3 +1,16 @@
+0.6.0
+-------------------------------------------------------------------------------
+ * Synced proplib with NetBSD HEAD, with the following changes:
+	- Fixed a segfault in prop_dictionary_equals(3).
+	- New interfaces added to prop_{array,dictionary}_util(3):
+		* prop_array_set_and_rel()
+		* prop_dictionary_set_and_rel()
+		* prop_dictionary_get_dict()
+	- Markup, typos, etc for the manual pages.
+
+ * New interfaces added to prop_array_util(3):
+	* prop_array_add_cstring()
+	* prop_array_add_cstring_nocopy()
 
 0.5.1
 -------------------------------------------------------------------------------
