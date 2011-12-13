@@ -1,4 +1,7 @@
 prop_array_add
+prop_array_add_and_rel
+prop_array_add_cstring
+prop_array_add_cstring_nocopy
 prop_array_add_int16
 prop_array_add_int32
 prop_array_add_int64
@@ -76,6 +79,7 @@ prop_dictionary_get
 prop_dictionary_get_bool
 prop_dictionary_get_cstring
 prop_dictionary_get_cstring_nocopy
+prop_dictionary_get_dict
 prop_dictionary_get_int16
 prop_dictionary_get_int32
 prop_dictionary_get_int64
@@ -96,6 +100,7 @@ prop_dictionary_make_immutable
 prop_dictionary_remove
 prop_dictionary_remove_keysym
 prop_dictionary_set
+prop_dictionary_set_and_rel
 prop_dictionary_set_bool
 prop_dictionary_set_cstring
 prop_dictionary_set_cstring_nocopy
