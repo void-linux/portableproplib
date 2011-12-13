@@ -1183,6 +1183,8 @@ prop_object_equals_with_error(prop_object_t obj1, prop_object_t obj2,
 		if (!_prop_stack_pop(&stack, &obj1, &obj2,
 				     &stored_pointer1, &stored_pointer2))
 			return true;
+		po1 = obj1;
+		po2 = obj2;
 		goto continue_subtree;
 	}
 	_PROP_ASSERT(ret == _PROP_OBJECT_EQUALS_RECURSE);
