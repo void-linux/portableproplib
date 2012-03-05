@@ -1,3 +1,10 @@
+0.6.1
+-------------------------------------------------------------------------------
+ * Fixed a syntax error in generated pkg-config file.
+ * Fixed zlib's decompressor code to work with 1.2.6.
+ * Changed zlib's decompressor to process chunks of 8K. This seems to give
+   a small performance improvement to many real cases.
+
 0.6.0
 -------------------------------------------------------------------------------
  * Synced proplib with NetBSD HEAD, with the following changes:
