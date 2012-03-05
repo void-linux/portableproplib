@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2010, 2011 Juan Romero Pardines.
+ * Copyright (c) 2010-2012 Juan Romero Pardines.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #include <errno.h>
 #include <zlib.h>
 
-#define _READ_CHUNK	512
+#define _READ_CHUNK	8192
 
 #define TEMPLATE(type)									\
 bool											\
@@ -58,7 +58,7 @@ prop ## type ## _internalize_from_zfile(const char *fname)				\
 	struct _prop_object_internalize_mapped_file *mf;				\
 	prop ## type ## _t obj;								\
 	z_stream strm;									\
-	unsigned char out[_READ_CHUNK];							\
+	unsigned char *out;								\
 	char *uncomp_xml = NULL;							\
 	size_t have;									\
 	ssize_t totalsize = 0;								\
@@ -67,6 +67,21 @@ prop ## type ## _internalize_from_zfile(const char *fname)				\
 	mf = _prop_object_internalize_map_file(fname);					\
 	if (mf == NULL)									\
 		return NULL;								\
+											\
+	/* Output buffer (uncompressed) */						\
+	uncomp_xml = _PROP_MALLOC(_READ_CHUNK, M_TEMP);					\
+	if (uncomp_xml == NULL) {							\
+		_prop_object_internalize_unmap_file(mf);				\
+		return NULL;								\
+	}										\
+											\
+	/* temporary output buffer for inflate */					\
+	out = _PROP_MALLOC(_READ_CHUNK, M_TEMP);					\
+	if (out == NULL) {								\
+		_PROP_FREE(uncomp_xml, M_TEMP);						\
+		_prop_object_internalize_unmap_file(mf);				\
+		return NULL;								\
+	}										\
 											\
 	/* Decompress the mmap'ed buffer with zlib */					\
 	strm.zalloc = Z_NULL;								\
@@ -77,19 +92,13 @@ prop ## type ## _internalize_from_zfile(const char *fname)				\
 											\
 	/* 15+16 to use gzip method */							\
 	if (inflateInit2(&strm, 15+16) != Z_OK) {					\
+		_PROP_FREE(out, M_TEMP);						\
+		_PROP_FREE(uncomp_xml, M_TEMP);						\
 		_prop_object_internalize_unmap_file(mf);				\
 		return NULL;								\
 	}										\
 	strm.avail_in = mf->poimf_mapsize;						\
 	strm.next_in = (unsigned char *)mf->poimf_xml;					\
-											\
-	/* Output buffer (uncompressed) */						\
-	uncomp_xml = _PROP_MALLOC(_READ_CHUNK, M_TEMP);					\
-	if (uncomp_xml == NULL) {							\
-		(void)inflateEnd(&strm);						\
-		_prop_object_internalize_unmap_file(mf);				\
-		return NULL;								\
-	}										\
 											\
 	/* Inflate the input buffer and copy into 'uncomp_xml' */			\
 	do {										\
@@ -100,6 +109,7 @@ prop ## type ## _internalize_from_zfile(const char *fname)				\
 		case Z_DATA_ERROR:							\
 			/* Wrong compressed data or uncompressed, try normal method. */	\
 			(void)inflateEnd(&strm);					\
+			_PROP_FREE(out, M_TEMP);					\
 			_PROP_FREE(uncomp_xml, M_TEMP);					\
 			obj = prop ## type ## _internalize(mf->poimf_xml);		\
 			_prop_object_internalize_unmap_file(mf);			\
@@ -108,6 +118,7 @@ prop ## type ## _internalize_from_zfile(const char *fname)				\
 		case Z_NEED_DICT:							\
 		case Z_MEM_ERROR:							\
 			(void)inflateEnd(&strm);					\
+			_PROP_FREE(out, M_TEMP);					\
 			_PROP_FREE(uncomp_xml, M_TEMP);					\
 			_prop_object_internalize_unmap_file(mf);			\
 			errno = rv;							\
@@ -122,6 +133,7 @@ prop ## type ## _internalize_from_zfile(const char *fname)				\
 	/* we are done */								\
 	(void)inflateEnd(&strm);							\
 	obj = prop ## type ## _internalize(uncomp_xml);					\
+	_PROP_FREE(out, M_TEMP);							\
 	_PROP_FREE(uncomp_xml, M_TEMP);							\
 	_prop_object_internalize_unmap_file(mf);					\
 											\
