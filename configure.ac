@@ -5,7 +5,7 @@ AC_PREREQ(2.52)
 
 m4_define([proplib_major_version], [0])
 m4_define([proplib_minor_version], [6])
-m4_define([proplib_micro_version], [1])
+m4_define([proplib_micro_version], [2])
 m4_define([proplib_version],
 	  [proplib_major_version.proplib_minor_version.proplib_micro_version])
 
@@ -23,7 +23,7 @@ LT_CURRENT=0
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=11
+LT_REVISION=12
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -51,7 +51,7 @@ AC_CONFIG_FILES([Makefile
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_CHECK_HEADERS(limits.h stddef.h fcntl.h)
-AC_CHECK_FUNCS(memmove memset munmap strchr strtoul stroull strlcat)
+AC_CHECK_FUNCS(memmove memset munmap strchr strtoul stroull strlcat fdatasync)
 AC_CHECK_LIB(pthread, pthread_mutex_init, ,
 	     AC_MSG_ERROR(*** A POSIX threads library is required, aborting ***))
 AC_CHECK_LIB(z, inflate, ,

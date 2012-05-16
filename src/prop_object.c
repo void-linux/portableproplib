@@ -858,7 +858,11 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 			goto bad;
 	}
 
+#ifdef HAVE_FDATASYNC
+	if (fdatasync(fd) == -1)
+#else
 	if (fsync(fd) == -1)
+#endif
 		goto bad;
 
 	myumask = umask(0);

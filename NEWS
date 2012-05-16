@@ -1,3 +1,8 @@
+0.6.2
+-------------------------------------------------------------------------------
+ * When externalizing plists and if fdatasync(2) is available, use it
+   rather than fsync(2) which can be expensive some times.
+
 0.6.1
 -------------------------------------------------------------------------------
  * Fixed a syntax error in generated pkg-config file.
