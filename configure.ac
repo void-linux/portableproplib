@@ -23,7 +23,7 @@ LT_CURRENT=0
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=12
+LT_REVISION=13
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has

@@ -1,5 +1,7 @@
 0.6.2
 -------------------------------------------------------------------------------
+ * Improve performance of prop_xxx_internalize_from_zfile() when plist is
+   already uncompressed.
  * When externalizing plists and if fdatasync(2) is available, use it
    rather than fsync(2) which can be expensive some times.
 
