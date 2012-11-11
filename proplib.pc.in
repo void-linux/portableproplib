@@ -6,6 +6,6 @@ includedir=@includedir@/prop
 Name: proplib
 Description: Portable Property container object library
 Version: @PACKAGE_VERSION@
-Libs: @LIBS@ -lprop -L${libdir}
+Libs: -lprop -L${libdir}
 Cflags: -I${includedir}
 Libs.private: @LIBS@
