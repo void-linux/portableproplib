@@ -32,13 +32,8 @@
 #ifndef _SYS_RBTREE_H_
 #define	_SYS_RBTREE_H_
 
-#if defined(_KERNEL) || defined(_STANDALONE)
-#include <sys/types.h>
-
-#else
 #include <stdbool.h>
 #include <inttypes.h>
-#endif
 #include <queue.h>
 
 #if __GNUC_PREREQ(2, 96)

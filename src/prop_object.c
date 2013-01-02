@@ -61,7 +61,7 @@ _prop_object_init(struct _prop_object *po, const struct _prop_object_type *pot)
  */
 /*ARGSUSED*/
 void
-_prop_object_fini(struct _prop_object *po _PROP_ARG_UNUSED)
+_prop_object_fini(struct _prop_object *po)
 {
 	/* Nothing to do, currently. */
 }
