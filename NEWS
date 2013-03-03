@@ -1,3 +1,8 @@
+0.6.3
+-------------------------------------------------------------------------------
+ * Removed NetBSD specific code and defines for kernel/standalone.
+ * Portability fixes to allow building with the musl C library.
+
 0.6.2
 -------------------------------------------------------------------------------
  * Improve performance of prop_xxx_internalize_from_zfile() when plist is
