@@ -5,7 +5,7 @@ AC_PREREQ(2.52)
 
 m4_define([proplib_major_version], [0])
 m4_define([proplib_minor_version], [6])
-m4_define([proplib_micro_version], [2])
+m4_define([proplib_micro_version], [3])
 m4_define([proplib_version],
 	  [proplib_major_version.proplib_minor_version.proplib_micro_version])
 
