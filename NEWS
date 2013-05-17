@@ -1,3 +1,7 @@
+0.6.4
+-------------------------------------------------------------------------------
+ * Properly enable fdatasync(3) if it's found in configure.
+
 0.6.3
 -------------------------------------------------------------------------------
  * Removed NetBSD specific code and defines for kernel/standalone.
