@@ -1,4 +1,4 @@
-/*	$NetBSD: prop_dictionary.c,v 1.37 2011/04/20 19:40:00 martin Exp $	*/
+/*	$NetBSD: prop_dictionary.c,v 1.39 2013/10/18 18:26:20 martin Exp $	*/
 
 /*-
  * Copyright (c) 2006, 2007 The NetBSD Foundation, Inc.
@@ -29,10 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "prop_object_impl.h"
 #include <prop/prop_array.h>
 #include <prop/prop_dictionary.h>
 #include <prop/prop_string.h>
-#include "prop_object_impl.h"
 #include "prop_rb_impl.h"
 
 #include <errno.h>
@@ -169,7 +169,7 @@ struct _prop_dictionary_iterator {
 
 static int
 /*ARGSUSED*/
-_prop_dict_keysym_rb_compare_nodes(void *ctx,
+_prop_dict_keysym_rb_compare_nodes(void *ctx _PROP_ARG_UNUSED,
 				   const void *n1, const void *n2)
 {
 	const struct _prop_dictionary_keysym *pdk1 = n1;
@@ -180,7 +180,7 @@ _prop_dict_keysym_rb_compare_nodes(void *ctx,
 
 static int
 /*ARGSUSED*/
-_prop_dict_keysym_rb_compare_key(void *ctx,
+_prop_dict_keysym_rb_compare_key(void *ctx _PROP_ARG_UNUSED,
 				 const void *n, const void *v)
 {
 	const struct _prop_dictionary_keysym *pdk = n;
@@ -334,7 +334,7 @@ _prop_dict_keysym_alloc(const char *key)
 	rpdk = _prop_rb_tree_insert_node(&_prop_dict_keysym_tree, pdk);
 	_PROP_ASSERT(rpdk == pdk);
 	_PROP_MUTEX_UNLOCK(_prop_dict_keysym_tree_mutex);
-	return (pdk);
+	return (rpdk);
 }
 
 static _prop_object_free_rv_t
@@ -624,7 +624,7 @@ static prop_object_t
 _prop_dictionary_iterator_next_object(void *v)
 {
 	struct _prop_dictionary_iterator *pdi = v;
-	prop_dictionary_t pd = pdi->pdi_base.pi_obj;
+	prop_dictionary_t pd _PROP_ARG_UNUSED = pdi->pdi_base.pi_obj;
 	prop_dictionary_keysym_t pdk;
 
 	_PROP_ASSERT(prop_object_is_dictionary(pd));
@@ -651,7 +651,7 @@ static void
 _prop_dictionary_iterator_reset(void *v)
 {
 	struct _prop_dictionary_iterator *pdi = v;
-	prop_dictionary_t pd = pdi->pdi_base.pi_obj;
+	prop_dictionary_t pd _PROP_ARG_UNUSED = pdi->pdi_base.pi_obj;
 
 	_PROP_RWLOCK_RDLOCK(pd->pd_rwlock);
 	_prop_dictionary_iterator_reset_locked(pdi);
@@ -1384,8 +1384,7 @@ prop_dictionary_externalize_to_file(prop_dictionary_t dict, const char *fname)
 	xml = prop_dictionary_externalize(dict);
 	if (xml == NULL)
 		return (false);
-	rv = _prop_object_externalize_write_file(fname, xml, strlen(xml),
-	    false);
+	rv = _prop_object_externalize_write_file(fname, xml, strlen(xml), false);
 	if (rv == false)
 		save_errno = errno;
 	_PROP_FREE(xml, M_TEMP);

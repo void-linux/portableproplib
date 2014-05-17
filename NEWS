@@ -1,6 +1,7 @@
 0.6.4
 -------------------------------------------------------------------------------
  * Properly enable fdatasync(3) if it's found in configure.
+ * Synced code with NetBSD HEAD, bringing some bugfixes and portability changes.
 
 0.6.3
 -------------------------------------------------------------------------------
