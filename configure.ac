@@ -52,6 +52,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_CHECK_HEADERS(limits.h stddef.h fcntl.h)
 AC_CHECK_FUNCS(memmove memset munmap strchr strtoul stroull strlcat fdatasync)
+AC_CHECK_DECLS(fdatasync, [], [], [#include <unistd.h>])
 AC_CHECK_LIB(pthread, pthread_mutex_init, ,
 	     AC_MSG_ERROR(*** A POSIX threads library is required, aborting ***))
 AC_CHECK_LIB(z, inflate, ,
