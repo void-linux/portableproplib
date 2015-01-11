@@ -58,6 +58,22 @@ AC_CHECK_LIB(pthread, pthread_mutex_init, ,
 AC_CHECK_LIB(z, inflate, ,
 	     AC_MSG_ERROR(*** zlib is required, aborting ***))
 
+AC_MSG_CHECKING(for GCC atomic builtins)
+AC_COMPILE_IFELSE(
+	[AC_LANG_SOURCE(
+	[[#include <stdint.h>
+		int main() {
+			volatile unsigned long val = 1;
+			__sync_fetch_and_add(&val, 1);
+			__sync_fetch_and_sub(&val, 1);
+			__sync_add_and_fetch(&val, 1);
+			__sync_sub_and_fetch(&val, 1);
+			return 0;
+		}
+	]])],
+	[AC_MSG_RESULT(yes); AC_DEFINE([HAVE_ATOMICS], [1], [GCC atomics support])],
+	[AC_MSG_RESULT(no)])
+
 AC_C_CONST
 AC_FUNC_MEMCMP
 AC_FUNC_MMAP

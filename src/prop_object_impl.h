@@ -35,6 +35,10 @@
 #include <inttypes.h>
 #include "prop_stack.h"
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 struct _prop_object_externalize_context {
 	char *		poec_buf;		/* string buffer */
 	size_t		poec_capacity;		/* capacity of buffer */
@@ -277,39 +281,61 @@ struct _prop_object_iterator {
 	static pthread_once_t x = PTHREAD_ONCE_INIT;
 #define _PROP_ONCE_RUN(x,f)		pthread_once(&(x),(void(*)(void))f)
 
+#ifndef HAVE_ATOMICS /* NO ATOMIC SUPPORT, USE A MUTEX */
+
 #define _PROP_NEED_REFCNT_MTX
+#define _PROP_ATOMIC_INC32(x) \
+	do { \
+		pthread_mutex_lock(&_prop_refcnt_mtx); \
+		(*(x))++; \
+		pthread_mutex_unlock(&_prop_refcnt_mtx); \
+	} while (/*CONSTCOND*/0)
+#define _PROP_ATOMIC_DEC32(x) \
+	do { \
+		pthread_mutex_lock(&_prop_refcnt_mtx); \
+		(*(x))--; \
+		pthread_mutex_unlock(&_prop_refcnt_mtx); \
+	} while (/*CONSTCOND*/0)
+#define _PROP_ATOMIC_INC32_NV(x, v) \
+	do { \
+		pthread_mutex_lock(&_prop_refcnt_mtx); \
+		v = ++(*(x)); \
+		pthread_mutex_unlock(&_prop_refcnt_mtx); \
+	} while (/*CONSTCOND*/0)
+#define _PROP_ATOMIC_DEC32_NV(x, v) \
+	do { \
+		pthread_mutex_lock(&_prop_refcnt_mtx); \
+		v = --(*(x)); \
+		pthread_mutex_unlock(&_prop_refcnt_mtx); \
+	} while (/*CONSTCOND*/0)
+
+#else /* GCC ATOMIC BUILTINS */
 
 #define _PROP_ATOMIC_INC32(x)						\
 do {									\
-	pthread_mutex_lock(&_prop_refcnt_mtx);				\
-	(*(x))++;							\
-	pthread_mutex_unlock(&_prop_refcnt_mtx);			\
+	(void)__sync_fetch_and_add(x, 1);				\
 } while (/*CONSTCOND*/0)
 
 #define _PROP_ATOMIC_DEC32(x)						\
 do {									\
-	pthread_mutex_lock(&_prop_refcnt_mtx);				\
-	(*(x))--;							\
-	pthread_mutex_unlock(&_prop_refcnt_mtx);			\
+	(void)__sync_fetch_and_sub(x, 1);				\
 } while (/*CONSTCOND*/0)
 
 #define _PROP_ATOMIC_INC32_NV(x, v)					\
 do {									\
-	pthread_mutex_lock(&_prop_refcnt_mtx);				\
-	v = ++(*(x));							\
-	pthread_mutex_unlock(&_prop_refcnt_mtx);			\
+	v = __sync_add_and_fetch(x, 1);					\
 } while (/*CONSTCOND*/0)
 
 #define _PROP_ATOMIC_DEC32_NV(x, v)					\
 do {									\
-	pthread_mutex_lock(&_prop_refcnt_mtx);				\
-	v = --(*(x));							\
-	pthread_mutex_unlock(&_prop_refcnt_mtx);			\
+	v = __sync_sub_and_fetch(x, 1);					\
 } while (/*CONSTCOND*/0)
+
+#endif /* !HAVE_ATOMICS */
 
 /*
  * Language features.
  */
-#define	_PROP_ARG_UNUSED		/* delete */
+#define	_PROP_ARG_UNUSED		__attribute__((unused))
 
 #endif /* _PROPLIB_PROP_OBJECT_IMPL_H_ */
