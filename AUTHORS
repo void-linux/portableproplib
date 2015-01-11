@@ -1,4 +1,2 @@
-The NetBSD's proplib implementation was written by Jason R. Thorpe.
-
-The Portable proplib implementation is maintained by
-Juan Romero Pardines <xtraeme@gmail.com>.
+Jason R. Thorpe (Original NetBSD author)
+Juan Romero Pardines (Portable version, additional changes)
