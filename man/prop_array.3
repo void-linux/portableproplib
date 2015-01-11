@@ -1,6 +1,6 @@
 .\"	$NetBSD: prop_array.3,v 1.8 2008/04/30 13:10:46 martin Exp $
 .\"
-.\" Copyright (c) 2010 Juan Romero Pardines.
+.\" Copyright (c) 2010-2015 Juan Romero Pardines.
 .\" Copyright (c) 2006 The NetBSD Foundation, Inc.
 .\" All rights reserved.
 .\"
@@ -28,7 +28,7 @@
 .\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 .\" POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd Abril 19, 2010
+.Dd January, 2015
 .Dt PROP_ARRAY 3
 .Os
 .Sh NAME
@@ -46,6 +46,7 @@
 .Nm prop_array_get ,
 .Nm prop_array_set ,
 .Nm prop_array_add ,
+.Nm prop_array_add_first ,
 .Nm prop_array_remove ,
 .Nm prop_array_externalize ,
 .Nm prop_array_internalize ,
@@ -91,6 +92,8 @@
 .Fn prop_array_set "prop_array_t array" "unsigned int index" "prop_object_t obj"
 .Ft bool
 .Fn prop_array_add "prop_array_t array" "prop_object_t obj"
+.Ft bool
+.Fn prop_array_add_first "prop_array_t array" "prop_object_t obj"
 .Ft void
 .Fn prop_array_remove "prop_array_t array" "unsigned int index"
 .\"
@@ -208,6 +211,25 @@ otherwise.
 Add a reference to the object
 .Fa obj
 to the array, appending to the end and growing the array's capacity if
+necessary.
+The object will be retained by the array.
+Returns
+.Dv true
+if storing the object was successful and
+.Dv false
+otherwise.
+.Pp
+During expansion, array's capacity is augmented by the
+.Dv EXPAND_STEP
+constant, as defined in
+.Pa libprop/prop_array.c
+file, e.g.
+.Pp
+#define	EXPAND_STEP		16
+.It Fn prop_array_add_first "prop_array_t array" "prop_object_t obj"
+Add a reference to the object
+.Fa obj
+to the array, appending to the head and growing the array's capacity if
 necessary.
 The object will be retained by the array.
 Returns
