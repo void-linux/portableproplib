@@ -859,7 +859,7 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 			goto bad;
 	}
 
-#ifdef HAVE_FDATASYNC
+#if defined(HAVE_FDATASYNC) && HAVE_DECL_FDATASYNC
 	if (fdatasync(fd) == -1)
 #else
 	if (fsync(fd) == -1)
