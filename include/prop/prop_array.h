@@ -1,6 +1,7 @@
 /*     $NetBSD: prop_array.h,v 1.8 2008/09/11 13:15:13 haad Exp $    */
 
 /*-
+ * Copyright (c) 2014 Juan Romero Pardines.
  * Copyright (c) 2006 The NetBSD Foundation, Inc.
  * All rights reserved.
  *
@@ -59,6 +60,7 @@ prop_object_iterator_t prop_array_iterator(prop_array_t);
 prop_object_t	prop_array_get(prop_array_t, unsigned int);
 bool		prop_array_set(prop_array_t, unsigned int, prop_object_t);
 bool		prop_array_add(prop_array_t, prop_object_t);
+bool		prop_array_add_first(prop_array_t, prop_object_t);
 void		prop_array_remove(prop_array_t, unsigned int);
 
 bool		prop_array_equals(prop_array_t, prop_array_t);

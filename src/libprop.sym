@@ -10,6 +10,7 @@ prop_array_add_uint16
 prop_array_add_uint32
 prop_array_add_uint64
 prop_array_add_uint8
+prop_array_add_first
 prop_array_capacity
 prop_array_copy
 prop_array_copy_mutable
