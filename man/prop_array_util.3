@@ -1,4 +1,4 @@
-.\"	$NetBSD: prop_array_util.3,v 1.7 2011/10/17 09:24:54 wiz Exp $
+.\"	$NetBSD: prop_array_util.3,v 1.10 2017/02/12 16:00:53 abhinav Exp $
 .\"
 .\" Copyright (c) 2006 The NetBSD Foundation, Inc.
 .\" All rights reserved.
@@ -27,7 +27,7 @@
 .\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 .\" POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 13, 2011
+.Dd May 31, 2016
 .Dt PROP_ARRAY_UTIL 3
 .Os
 .Sh NAME
@@ -59,9 +59,9 @@
 .Nm prop_array_add_int64 ,
 .Nm prop_array_add_uint64 ,
 .Nm prop_array_add_cstring ,
-.Nm prop_array_add_cstring_nocopy ,
 .Nm prop_array_get_cstring ,
 .Nm prop_array_set_cstring ,
+.Nm prop_array_add_cstring_nocopy ,
 .Nm prop_array_get_cstring_nocopy ,
 .Nm prop_array_set_cstring_nocopy ,
 .Nm prop_array_add_and_rel
@@ -155,9 +155,7 @@
 .Fn prop_array_add_uint64 "prop_array_t array" "uint64_t val"
 .\"
 .Ft bool
-.Fn prop_array_add_cstring "prop_array_t array" "const char *str"
-.Ft bool
-.Fn prop_array_add_cstring_nocopy "prop_array_t array" "const char *str"
+.Fn prop_array_add_cstring "prop_array_t array" "const char *cp"
 .Ft bool
 .Fn prop_array_get_cstring "prop_array_t array" "unsigned int indx" \
     "char **strp"
@@ -165,6 +163,8 @@
 .Fn prop_array_set_cstring "prop_array_t array" "unsigned int indx" \
     "const char *str"
 .\"
+.Ft bool
+.Fn prop_array_add_cstring_nocopy "prop_array_t array" "const char *cp"
 .Ft bool
 .Fn prop_array_get_cstring_nocopy "prop_array_t array" \
     "unsigned int indx" "const char **strp"
@@ -176,7 +176,7 @@
     "prop_object_t obj"
 .Sh DESCRIPTION
 The
-.Nm prop_array_util
+.Fn prop_array_util
 family of functions are provided to make getting and setting values in
 arrays more convenient in some applications.
 .Pp
@@ -187,14 +187,17 @@ value type.
 The setters handle object creation and release for the caller.
 .Pp
 The
+.Fn prop_array_add_cstring
+and
 .Fn prop_array_get_cstring
-function returns dynamically allocated memory.
+functions returns dynamically allocated memory.
 See
 .Xr prop_string 3
 for more information.
 .Pp
 The
-.Fn prop_array_get_cstring_nocopy
+.Fn prop_array_add_cstring_nocopy ,
+.Fn prop_array_get_cstring_nocopy ,
 and
 .Fn prop_array_set_cstring_nocopy
 functions do not copy the string that is set or returned.
@@ -208,7 +211,7 @@ function adds the object to the end of the array and releases it.
 The object is also released on failure.
 .Sh RETURN VALUES
 The
-.Nm prop_array_util
+.Fn prop_array_util
 getter functions return
 .Dv true
 if the object exists in the array and the value is in-range, or
@@ -216,7 +219,7 @@ if the object exists in the array and the value is in-range, or
 otherwise.
 .Pp
 The
-.Nm prop_array_util
+.Fn prop_array_util
 setter functions return
 .Dv true
 if creating the object and storing it in the array is successful, or
@@ -229,6 +232,6 @@ otherwise.
 .Xr proplib 3
 .Sh HISTORY
 The
-.Nm proplib
+.Xr proplib 3
 property container object library first appeared in
 .Nx 4.0 .
