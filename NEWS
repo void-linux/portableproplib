@@ -1,3 +1,8 @@
+0.6.7
+-------------------------------------------------------------------------------
+* Synced rb.c with NetBSD HEAD bringing a bugfix:
+ - Fix failure case in rb_tree_find_node_leq/geq.
+
 0.6.6
 -------------------------------------------------------------------------------
 * Synced code with NetBSD HEAD, bringing some bugfixes and misc changes.
