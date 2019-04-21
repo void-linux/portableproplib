@@ -1,3 +1,8 @@
+0.6.8
+-------------------------------------------------------------------------------
+* Synchronized with xbps bringing various fixes.
+* Manual pages now don't report any warning from mandoc -Wall.
+
 0.6.7
 -------------------------------------------------------------------------------
 * Synced rb.c with NetBSD HEAD bringing a bugfix:
