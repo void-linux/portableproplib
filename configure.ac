@@ -5,7 +5,7 @@ AC_PREREQ(2.52)
 
 m4_define([proplib_major_version], [0])
 m4_define([proplib_minor_version], [6])
-m4_define([proplib_micro_version], [7])
+m4_define([proplib_micro_version], [8])
 m4_define([proplib_version],
 	  [proplib_major_version.proplib_minor_version.proplib_micro_version])
 
@@ -23,7 +23,7 @@ LT_CURRENT=0
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=15
+LT_REVISION=16
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
