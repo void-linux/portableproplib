@@ -1,0 +1,21 @@
+language: generic
+
+notifications:
+  email: false
+
+services:
+ - docker
+
+env:
+  matrix:
+   - CC=gcc IMG=voidlinux/voidlinux DEPS="gcc glibc-devel"
+   - CC=clang IMG=voidlinux/voidlinux DEPS="clang glibc-devel"
+   - CC=gcc IMG=voidlinux/voidlinux-musl DEPS="gcc musl-devel"
+   - CC=clang IMG=voidlinux/voidlinux-musl DEPS="clang musl-devel"
+
+install:
+ - docker pull "$IMG"
+ - docker run -v "$PWD":/tmp/build-dir -w "/tmp/build-dir" "$IMG" /bin/sh -c "xbps-install -Syu && xbps-install -y $DEPS make pkg-config zlib-devel && CC=$CC ./configure && make -j$(nproc)"
+
+script:
+ - echo BUILDS PASSED
