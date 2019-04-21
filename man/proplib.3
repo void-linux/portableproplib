@@ -75,8 +75,8 @@ If you create an object and do not explicitly maintain a reference to it,
 you must release it.
 .It
 If you get a reference to an object from other code and wish to maintain
-a reference to it, you must retain the object.  You are responsible for
-releasing the object once you drop that reference.
+a reference to it, you must retain the object.
+You are responsible for releasing the object once you drop that reference.
 .It
 You must never release an object unless you create it or retain it.
 .El
@@ -132,11 +132,15 @@ elements from an Apple XML property list will not be parsed.
 The
 .Nm
 .Sq number
-object type differs from the NetBSD XML property list format in the following
+object type differs from the
+.Nx NetBSD
+XML property list format in the following
 ways:
 .Bl -bullet
 .It
-The original NetBSD implementation is using base 16, not base 10 for the
+The original
+.Nx NetBSD
+implementation is using base 16, not base 10 for the
 external representation, but portable
 .Nm
 doesn't have this difference, it is using base 10 as Apple does.
