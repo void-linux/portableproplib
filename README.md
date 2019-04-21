@@ -1,3 +1,5 @@
+[![BuildStatus](https://travis-ci.org/xtraeme/portableproplib.svg?branch=master)](https://travis-ci.org/xtraeme/portableproplib)
+
 ### Portable Property container object library
 
 The proplib library provides an abstract interface for creating and
