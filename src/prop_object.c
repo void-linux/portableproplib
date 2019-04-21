@@ -40,9 +40,7 @@
 static pthread_mutex_t _prop_refcnt_mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif /* _PROP_NEED_REFCNT_MTX */
 
-#define __USE_MISC	/* MAP_ANON on glibc */
 #include <sys/mman.h>
-#undef __USE_MISC
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
