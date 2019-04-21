@@ -15,7 +15,7 @@ env:
 
 install:
  - docker pull "$IMG"
- - docker run -v "$PWD":/tmp/build-dir -w "/tmp/build-dir" "$IMG" /bin/sh -c "xbps-install -Syu && xbps-install -y $DEPS make pkg-config zlib-devel && CC=$CC ./configure && make -j$(nproc)"
+ - docker run -v "$PWD":/tmp/build-dir -w "/tmp/build-dir" "$IMG" /bin/sh -c "xbps-install -Syu && xbps-install -y $DEPS make automake pkg-config zlib-devel && ./bootstrap && CC=$CC ./configure && make -j$(nproc)"
 
 script:
  - echo BUILDS PASSED
