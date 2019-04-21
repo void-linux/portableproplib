@@ -40,7 +40,9 @@
 static pthread_mutex_t _prop_refcnt_mtx = PTHREAD_MUTEX_INITIALIZER;
 #endif /* _PROP_NEED_REFCNT_MTX */
 
+#define __USE_MISC	/* MAP_ANON on glibc */
 #include <sys/mman.h>
+#undef __USE_MISC
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -459,7 +461,6 @@ _prop_object_internalize_find_tag(struct _prop_object_internalize_context *ctx,
 			return (false);
 		cp++;
 	}
-
 	ctx->poic_tagattrval_len = cp - ctx->poic_tagattrval;
 	
 	cp++;
@@ -602,7 +603,7 @@ _prop_object_internalize_by_tag(struct _prop_object_internalize_context *ctx)
 
 match_start:
 	for (poi = _prop_object_internalizer_table;
-	     poi->poi_tag != NULL; poi++) {
+	     poi != NULL && poi->poi_tag != NULL; poi++) {
 		if (_prop_object_internalize_match(ctx->poic_tagname,
 						   ctx->poic_tagname_len,
 						   poi->poi_tag,
@@ -694,6 +695,9 @@ _prop_object_internalize_context_alloc(const char *xml)
 {
 	struct _prop_object_internalize_context *ctx;
 
+	if (xml == NULL)
+		return NULL;
+
 	ctx = _PROP_MALLOC(sizeof(struct _prop_object_internalize_context),
 			   M_TEMP);
 	if (ctx == NULL)
@@ -706,6 +710,8 @@ _prop_object_internalize_context_alloc(const char *xml)
 	 * know about / care about.
 	 */
 	for (;;) {
+		if (_PROP_EOF(*xml))
+			goto bad;
 		while (_PROP_ISSPACE(*xml))
 			xml++;
 		if (_PROP_EOF(*xml) || *xml != '<')
@@ -846,8 +852,12 @@ _prop_object_externalize_write_file(const char *fname, const char *xml,
 	strcat(tname, PLISTTMP);
 #undef PLISTTMP
 
-	if ((fd = mkstemp(tname)) == -1)
+	myumask = umask(S_IXUSR|S_IRWXG|S_IRWXO);
+	if ((fd = mkstemp(tname)) == -1) {
+		umask(myumask);
 		return (false);
+	}
+	umask(myumask);
 
 	if (do_compress) {
 		if ((gzf = gzdopen(fd, "a")) == NULL)
@@ -950,13 +960,13 @@ _prop_object_internalize_map_file(const char *fname)
 
 	mf->poimf_xml = mmap(NULL, need_guard ? mf->poimf_mapsize + pgsize
 			    		      : mf->poimf_mapsize,
-			    PROT_READ, MAP_FILE|MAP_SHARED, fd, (off_t)0);
+			    PROT_READ, MAP_SHARED, fd, (off_t)0);
 	(void) close(fd);
 	if (mf->poimf_xml == MAP_FAILED) {
 		_PROP_FREE(mf, M_TEMP);
 		return (NULL);
 	}
-	(void) madvise(mf->poimf_xml, mf->poimf_mapsize, MADV_SEQUENTIAL);
+	(void)posix_madvise(mf->poimf_xml, mf->poimf_mapsize, POSIX_MADV_SEQUENTIAL);
 
 	if (need_guard) {
 		if (mmap(mf->poimf_xml + mf->poimf_mapsize,
@@ -982,8 +992,8 @@ _prop_object_internalize_unmap_file(
     struct _prop_object_internalize_mapped_file *mf)
 {
 
-	(void) madvise(mf->poimf_xml, mf->poimf_mapsize, MADV_DONTNEED);
-	(void) munmap(mf->poimf_xml, mf->poimf_mapsize);
+	(void)posix_madvise(mf->poimf_xml, mf->poimf_mapsize, POSIX_MADV_DONTNEED);
+	(void)munmap(mf->poimf_xml, mf->poimf_mapsize);
 	_PROP_FREE(mf, M_TEMP);
 }
 
