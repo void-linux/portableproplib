@@ -1,4 +1,4 @@
-/*	$NetBSD: rbtree.h,v 1.1 2010/09/25 01:42:40 matt Exp $	*/
+/*	$NetBSD: rbtree.h,v 1.5 2019/03/07 14:39:21 roy Exp $	*/
 
 /*-
  * Copyright (c) 2001 The NetBSD Foundation, Inc.
@@ -34,36 +34,11 @@
 
 #if defined(_KERNEL) || defined(_STANDALONE)
 #include <sys/types.h>
-
 #else
 #include <stdbool.h>
 #include <inttypes.h>
 #endif
 #include <queue.h>
-
-/* GCC version checking borrowed from glibc. */
-#if defined(__GNUC__) && defined(__GNUC_MINOR__)
-#  define __GNUC_PREREQ(maj,min) \
-	((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
-#else
-#  define __GNUC_PREREQ(maj,min) 0
-#endif
-
-#if __GNUC_PREREQ(2, 96)
-# ifndef __predict_true
-#  define __predict_true(exp)     __builtin_expect((exp), 1)
-# endif
-# ifndef __predict_false
-#  define __predict_false(exp)    __builtin_expect((exp), 0)
-# endif
-#else
-# ifndef __predict_true
-#  define __predict_true(exp)     (exp)
-# endif
-# ifndef __predict_false
-#  define __predict_false(exp)    (exp)
-# endif
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,8 +58,8 @@ typedef struct rb_node {
 	 * rb_node will have an alignment of 4 or 8 bytes.
 	 */
 	uintptr_t rb_info;
-#define	RB_FLAG_POSITION	0x2
-#define	RB_FLAG_RED		0x1
+#define	RB_FLAG_POSITION	(uintptr_t)0x2
+#define	RB_FLAG_RED		(uintptr_t)0x1
 #define	RB_FLAG_MASK		(RB_FLAG_POSITION|RB_FLAG_RED)
 #define	RB_FATHER(rb) \
     ((struct rb_node *)((rb)->rb_info & ~RB_FLAG_MASK))
@@ -128,12 +103,20 @@ typedef struct rb_node {
 
 #define RB_TREE_MIN(T) rb_tree_iterate((T), NULL, RB_DIR_LEFT)
 #define RB_TREE_MAX(T) rb_tree_iterate((T), NULL, RB_DIR_RIGHT)
+#define RB_TREE_NEXT(T, N) rb_tree_iterate((T), (N), RB_DIR_RIGHT)
+#define RB_TREE_PREV(T, N) rb_tree_iterate((T), (N), RB_DIR_LEFT)
 #define RB_TREE_FOREACH(N, T) \
-    for ((N) = RB_TREE_MIN(T); (N); \
-	(N) = rb_tree_iterate((T), (N), RB_DIR_RIGHT))
+    for ((N) = RB_TREE_MIN(T); (N); (N) = RB_TREE_NEXT((T), (N)))
 #define RB_TREE_FOREACH_REVERSE(N, T) \
-    for ((N) = RB_TREE_MAX(T); (N); \
-	(N) = rb_tree_iterate((T), (N), RB_DIR_LEFT))
+    for ((N) = RB_TREE_MAX(T); (N); (N) = RB_TREE_PREV((T), (N)))
+#define RB_TREE_FOREACH_SAFE(N, T, S) \
+    for ((N) = RB_TREE_MIN(T); \
+        (N) && ((S) = RB_TREE_NEXT((T), (N)), 1); \
+        (N) = (S))
+#define RB_TREE_FOREACH_REVERSE_SAFE(N, T, S) \
+    for ((N) = RB_TREE_MAX(T); \
+        (N) && ((S) = RB_TREE_PREV((T), (N)), 1); \
+        (N) = (S))
 
 #ifdef RBDEBUG
 TAILQ_HEAD(rb_node_qh, rb_node);
@@ -163,10 +146,8 @@ TAILQ_HEAD(rb_node_qh, rb_node);
  *	return 0 if they are considered same.
  */
 
-typedef signed int (*const rbto_compare_nodes_fn)(void *,
-    const void *, const void *);
-typedef signed int (*const rbto_compare_key_fn)(void *,
-    const void *, const void *);
+typedef signed int (*rbto_compare_nodes_fn)(void *, const void *, const void *);
+typedef signed int (*rbto_compare_key_fn)(void *, const void *, const void *);
 
 typedef struct {
 	rbto_compare_nodes_fn rbto_compare_nodes;
