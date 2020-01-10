@@ -32,14 +32,14 @@
 #include "prop_stack.h"
 #include "prop_object_impl.h"
 
-void
+HIDDEN void
 _prop_stack_init(prop_stack_t stack)
 {
 	stack->used_intern_elems = 0;
 	SLIST_INIT(&stack->extern_elems);
 }
 
-bool
+HIDDEN bool
 _prop_stack_push(prop_stack_t stack, prop_object_t obj, void *data1,
     void *data2, void *data3)
 {
@@ -76,7 +76,7 @@ _prop_stack_push(prop_stack_t stack, prop_object_t obj, void *data1,
 	return true;
 }
 
-bool
+HIDDEN bool
 _prop_stack_pop(prop_stack_t stack, prop_object_t *obj, void **data1,
     void **data2, void **data3)
 {

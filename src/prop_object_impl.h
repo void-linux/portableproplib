@@ -39,6 +39,12 @@
 # include "config.h"
 #endif
 
+#if HAVE_VISIBILITY
+#define HIDDEN __attribute__ ((visibility("hidden")))
+#else
+#define HIDDEN
+#endif
+
 struct _prop_object_externalize_context {
 	char *		poec_buf;		/* string buffer */
 	size_t		poec_capacity;		/* capacity of buffer */
@@ -46,32 +52,32 @@ struct _prop_object_externalize_context {
 	unsigned int	poec_depth;		/* nesting depth */
 };
 
-bool		_prop_object_externalize_start_tag(
+HIDDEN bool		_prop_object_externalize_start_tag(
 				struct _prop_object_externalize_context *,
 				const char *);
-bool		_prop_object_externalize_end_tag(
+HIDDEN bool		_prop_object_externalize_end_tag(
 				struct _prop_object_externalize_context *,
 				const char *);
-bool		_prop_object_externalize_empty_tag(
+HIDDEN bool		_prop_object_externalize_empty_tag(
 				struct _prop_object_externalize_context *,
 				const char *);
-bool		_prop_object_externalize_append_cstring(
+HIDDEN bool		_prop_object_externalize_append_cstring(
 				struct _prop_object_externalize_context *,
 				const char *);
-bool		_prop_object_externalize_append_encoded_cstring(
+HIDDEN bool		_prop_object_externalize_append_encoded_cstring(
 				struct _prop_object_externalize_context *,
 				const char *);
-bool		_prop_object_externalize_append_char(
+HIDDEN bool		_prop_object_externalize_append_char(
 				struct _prop_object_externalize_context *,
 				unsigned char);
-bool		_prop_object_externalize_header(
+HIDDEN bool		_prop_object_externalize_header(
 				struct _prop_object_externalize_context *);
-bool		_prop_object_externalize_footer(
+HIDDEN bool		_prop_object_externalize_footer(
 				struct _prop_object_externalize_context *);
 
-struct _prop_object_externalize_context *
+HIDDEN struct _prop_object_externalize_context *
 	_prop_object_externalize_context_alloc(void);
-void	_prop_object_externalize_context_free(
+HIDDEN void	_prop_object_externalize_context_free(
 				struct _prop_object_externalize_context *);
 
 typedef enum {
@@ -128,24 +134,24 @@ typedef enum {
 				       (ctx)->poic_tagattrval_len,\
 				       (a), strlen(a))
 
-bool		_prop_object_internalize_find_tag(
+HIDDEN bool		_prop_object_internalize_find_tag(
 				struct _prop_object_internalize_context *,
 				const char *, _prop_tag_type_t);
-bool		_prop_object_internalize_match(const char *, size_t,
+HIDDEN bool		_prop_object_internalize_match(const char *, size_t,
 					       const char *, size_t);
-prop_object_t	_prop_object_internalize_by_tag(
+HIDDEN prop_object_t	_prop_object_internalize_by_tag(
 				struct _prop_object_internalize_context *);
-bool		_prop_object_internalize_decode_string(
+HIDDEN bool		_prop_object_internalize_decode_string(
 				struct _prop_object_internalize_context *,
 				char *, size_t, size_t *, const char **);
-prop_object_t	_prop_generic_internalize(const char *, const char *);
+HIDDEN prop_object_t	_prop_generic_internalize(const char *, const char *);
 
-struct _prop_object_internalize_context *
+HIDDEN struct _prop_object_internalize_context *
 		_prop_object_internalize_context_alloc(const char *);
-void		_prop_object_internalize_context_free(
+HIDDEN void		_prop_object_internalize_context_free(
 				struct _prop_object_internalize_context *);
 
-bool		_prop_object_externalize_write_file(const char *,
+HIDDEN bool		_prop_object_externalize_write_file(const char *,
 						    const char *, size_t, bool);
 
 struct _prop_object_internalize_mapped_file {
@@ -153,9 +159,9 @@ struct _prop_object_internalize_mapped_file {
 	size_t	poimf_mapsize;
 };
 
-struct _prop_object_internalize_mapped_file *
+HIDDEN struct _prop_object_internalize_mapped_file *
 		_prop_object_internalize_map_file(const char *);
-void		_prop_object_internalize_unmap_file(
+HIDDEN void		_prop_object_internalize_unmap_file(
 				struct _prop_object_internalize_mapped_file *);
 
 typedef bool (*prop_object_internalizer_t)(prop_stack_t, prop_object_t *,
@@ -166,17 +172,17 @@ typedef bool (*prop_object_internalizer_continue_t)(prop_stack_t,
 				void *, prop_object_t);
 
 	/* These are here because they're required by shared code. */
-bool		_prop_array_internalize(prop_stack_t, prop_object_t *,
+HIDDEN bool		_prop_array_internalize(prop_stack_t, prop_object_t *,
 				struct _prop_object_internalize_context *);
-bool		_prop_bool_internalize(prop_stack_t, prop_object_t *,
+HIDDEN bool		_prop_bool_internalize(prop_stack_t, prop_object_t *,
 				struct _prop_object_internalize_context *);
-bool		_prop_data_internalize(prop_stack_t, prop_object_t *,
+HIDDEN bool		_prop_data_internalize(prop_stack_t, prop_object_t *,
 				struct _prop_object_internalize_context *);
-bool		_prop_dictionary_internalize(prop_stack_t, prop_object_t *,
+HIDDEN bool		_prop_dictionary_internalize(prop_stack_t, prop_object_t *,
 				struct _prop_object_internalize_context *);
-bool		_prop_number_internalize(prop_stack_t, prop_object_t *,
+HIDDEN bool		_prop_number_internalize(prop_stack_t, prop_object_t *,
 				struct _prop_object_internalize_context *);
-bool		_prop_string_internalize(prop_stack_t, prop_object_t *,
+HIDDEN bool		_prop_string_internalize(prop_stack_t, prop_object_t *,
 				struct _prop_object_internalize_context *);
 
 struct _prop_object_type {
@@ -216,9 +222,9 @@ struct _prop_object {
 	uint32_t	po_refcnt;		/* reference count */
 };
 
-void		_prop_object_init(struct _prop_object *,
+HIDDEN void		_prop_object_init(struct _prop_object *,
 				  const struct _prop_object_type *);
-void		_prop_object_fini(struct _prop_object *);
+HIDDEN void		_prop_object_fini(struct _prop_object *);
 
 struct _prop_object_iterator {
 	prop_object_t	(*pi_next_object)(void *);

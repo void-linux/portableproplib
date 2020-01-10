@@ -4,7 +4,8 @@ MANDIR ?= share/man
 CC ?= cc
 AR ?= ar
 RANLIB ?= ranlib
-CFLAGS += -I./include -I./src -D_XOPEN_SOURCE=700 -D_DEFAULT_SOURCE
+CFLAGS += -I./include -I./src
+CFLAGS += -DHAVE_VISIBILITY -D_XOPEN_SOURCE=700 -D_DEFAULT_SOURCE
 CFLAGS += -O2 -Wall -Werror -g -pipe -pthread -fPIC
 LDFLAGS += -L$(PREFIX)/lib
 LIBS = -lz -lpthread

@@ -40,6 +40,12 @@
 #endif
 #include <queue.h>
 
+#if HAVE_VISIBILITY
+#define HIDDEN __attribute__ ((visibility("hidden")))
+#else
+#define HIDDEN
+#endif
+
 #ifndef __predict_true
 # define __predict_true(exp)     (exp)
 #endif
@@ -189,18 +195,18 @@ typedef struct rb_tree {
 #define	RBSTAT_DEC(v)	do { } while (/*CONSTCOND*/0)
 #endif
 
-void	rb_tree_init(rb_tree_t *, const rb_tree_ops_t *);
-void *	rb_tree_insert_node(rb_tree_t *, void *);
-void *	rb_tree_find_node(rb_tree_t *, const void *);
-void *	rb_tree_find_node_geq(rb_tree_t *, const void *);
-void *	rb_tree_find_node_leq(rb_tree_t *, const void *);
-void	rb_tree_remove_node(rb_tree_t *, void *);
-void *	rb_tree_iterate(rb_tree_t *, void *, const unsigned int);
+HIDDEN void	rb_tree_init(rb_tree_t *, const rb_tree_ops_t *);
+HIDDEN void *	rb_tree_insert_node(rb_tree_t *, void *);
+HIDDEN void *	rb_tree_find_node(rb_tree_t *, const void *);
+HIDDEN void *	rb_tree_find_node_geq(rb_tree_t *, const void *);
+HIDDEN void *	rb_tree_find_node_leq(rb_tree_t *, const void *);
+HIDDEN void	rb_tree_remove_node(rb_tree_t *, void *);
+HIDDEN void *	rb_tree_iterate(rb_tree_t *, void *, const unsigned int);
 #ifdef RBDEBUG
-void	rb_tree_check(const rb_tree_t *, bool);
+HIDDEN void	rb_tree_check(const rb_tree_t *, bool);
 #endif
 #ifdef RBSTATS
-void	rb_tree_depths(const rb_tree_t *, size_t *);
+HIDDEN void	rb_tree_depths(const rb_tree_t *, size_t *);
 #endif
 
 #ifdef __cplusplus
