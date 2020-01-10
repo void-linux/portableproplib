@@ -4,10 +4,10 @@ MANDIR ?= share/man
 CC ?= cc
 AR ?= ar
 RANLIB ?= ranlib
-CFLAGS += -I./include -D_POSIX_SOURCE
+CFLAGS += -pthread -I./include -D_POSIX_SOURCE
 CFLAGS += -O2 -Wall -Werror -g -pipe -std=c99
 LDFLAGS += -L$(PREFIX)/lib
-LIBS = -lz
+LIBS = -lz -lpthread
 SRCS = $(shell find src -type f -name '*.c')
 OBJS = $(SRCS:.c=.o)
 MANS = $(shell find man -type f -name '*.3')

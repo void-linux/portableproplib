@@ -58,10 +58,6 @@ __KERNEL_RCSID(0, "$NetBSD: rb.c,v 1.15 2019/05/09 10:56:24 skrll Exp $");
 #endif
 #endif
 
-#ifndef __predict_false
-# define __predict_false
-#endif
-
 #ifdef _LIBC
 __weak_alias(rb_tree_init, _rb_tree_init)
 __weak_alias(rb_tree_find_node, _rb_tree_find_node)

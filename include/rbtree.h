@@ -40,6 +40,13 @@
 #endif
 #include <queue.h>
 
+#ifndef __predict_true
+# define __predict_true(exp)     (exp)
+#endif
+#ifndef __predict_false
+# define __predict_false(exp)    (exp)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
