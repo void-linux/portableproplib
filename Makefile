@@ -5,7 +5,7 @@ CC ?= cc
 AR ?= ar
 RANLIB ?= ranlib
 CFLAGS += -I./include -I./src -D_XOPEN_SOURCE=700 -D_DEFAULT_SOURCE
-CFLAGS += -O2 -Wall -Werror -g -pipe -pthread
+CFLAGS += -O2 -Wall -Werror -g -pipe -pthread -fPIC
 LDFLAGS += -L$(PREFIX)/lib
 LIBS = -lz -lpthread
 SRCS = $(shell find src -type f -name '*.c')
