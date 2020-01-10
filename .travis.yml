@@ -12,10 +12,12 @@ env:
    - CC=clang IMG=voidlinux/voidlinux DEPS="clang glibc-devel"
    - CC=gcc IMG=voidlinux/voidlinux-musl DEPS="gcc musl-devel"
    - CC=clang IMG=voidlinux/voidlinux-musl DEPS="clang musl-devel"
+   - CC=tcc IMG=voidlinux/voidlinux-musl DEPS="tcc binutils musl-devel"
+   - CC=pcc IMG=voidlinux/voidlinux-musl DEPS="pcc binutils musl-devel"
 
 install:
  - docker pull "$IMG"
- - docker run -v "$PWD":/tmp/build-dir -w "/tmp/build-dir" "$IMG" /bin/sh -c "xbps-install -Syu && xbps-install -y $DEPS make libtool automake pkg-config zlib-devel && ./bootstrap && CC=$CC ./configure && make -j$(nproc)"
+ - docker run -v "$PWD":/tmp/build-dir -w "/tmp/build-dir" "$IMG" /bin/sh -c "xbps-install -Syu xbps && xbps-install -y $DEPS make zlib-devel && make -j$(nproc)"
 
 script:
  - echo BUILDS PASSED
