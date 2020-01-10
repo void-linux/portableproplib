@@ -969,7 +969,7 @@ _prop_object_internalize_map_file(const char *fname)
 	if (need_guard) {
 		if (mmap(mf->poimf_xml + mf->poimf_mapsize,
 			 pgsize, PROT_READ,
-			 MAP_ANONYMOUS|MAP_PRIVATE|MAP_FIXED, -1,
+			 MAP_ANON|MAP_PRIVATE|MAP_FIXED, -1,
 			 (off_t)0) == MAP_FAILED) {
 			(void) munmap(mf->poimf_xml, mf->poimf_mapsize);
 			_PROP_FREE(mf, M_TEMP);
