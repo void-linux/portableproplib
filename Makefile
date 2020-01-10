@@ -15,7 +15,7 @@ MANS = $(shell find man -type f -name '*.3')
 
 MAJORVER = 0
 MINORVER = 6
-MICROVER = 8
+MICROVER = 9
 VERSION = $(MAJORVER).$(MINORVER).$(MICROVER)
 SHLIB = libprop.so.$(VERSION)
 LDFLAGS += -shared -Wl,-soname,libprop.so.$(MAJORVER)
