@@ -4,8 +4,8 @@ MANDIR ?= share/man
 CC ?= cc
 AR ?= ar
 RANLIB ?= ranlib
-CFLAGS += -I./include -I./src -D_POSIX_SOURCE
-CFLAGS += -O2 -Wall -Werror -g -pipe -pthread -std=c99
+CFLAGS += -I./include -I./src -D_XOPEN_SOURCE=600
+CFLAGS += -O2 -Wall -Werror -g -pipe -pthread
 LDFLAGS += -L$(PREFIX)/lib
 LIBS = -lz -lpthread
 SRCS = $(shell find src -type f -name '*.c')
