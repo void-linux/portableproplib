@@ -29,8 +29,6 @@ writing as well) thanks to the zlib library.
 
 - If platform supports fdatasync, portableproplib uses this rather than fsync.
 
-- It can be built through the GNU autotools (configure/make).
-
 -  This implementation is only meant to be used in user space interfaces
 (unlike NetBSD's).
 
