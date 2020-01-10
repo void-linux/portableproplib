@@ -43,9 +43,11 @@
 #define	__rbt_unused
 #else
 #define KASSERT(s)	do { } while (/*CONSTCOND*/ 0)
-#define	__rbt_unused	__unused
+#define	__rbt_unused
 #endif
+#ifdef __RCSID
 __RCSID("$NetBSD: rb.c,v 1.15 2019/05/09 10:56:24 skrll Exp $");
+#endif
 #else
 #include <lib/libkern/libkern.h>
 __KERNEL_RCSID(0, "$NetBSD: rb.c,v 1.15 2019/05/09 10:56:24 skrll Exp $");
@@ -54,6 +56,10 @@ __KERNEL_RCSID(0, "$NetBSD: rb.c,v 1.15 2019/05/09 10:56:24 skrll Exp $");
 #else
 #define	__rbt_unused
 #endif
+#endif
+
+#ifndef __predict_false
+# define __predict_false
 #endif
 
 #ifdef _LIBC
