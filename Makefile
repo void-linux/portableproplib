@@ -33,6 +33,8 @@ libprop.a: $(OBJS)
 	$(RANLIB) $@
 
 install: all
+	install -d $(DESTDIR)/$(PREFIX)/include/prop
+	install -m644 include/prop/*.h $(DESTDIR)/$(PREFIX)/include/prop
 	install -d $(DESTDIR)/$(PREFIX)/lib/pkgconfig
 	install -m644 libprop.a $(DESTDIR)/$(PREFIX)/lib
 	install -m644 $(SHLIB) $(DESTDIR)/$(PREFIX)/lib
