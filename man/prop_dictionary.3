@@ -1,7 +1,6 @@
-.\"	$NetBSD: prop_dictionary.3,v 1.19 2017/02/12 16:00:53 abhinav Exp $
+.\"	$NetBSD: prop_dictionary.3,v 1.20 2020/06/06 21:25:59 thorpej Exp $
 .\"
-.\" Copyright (c) 2010 Juan Romero Pardines.
-.\" Copyright (c) 2006 The NetBSD Foundation, Inc.
+.\" Copyright (c) 2006, 2009 The NetBSD Foundation, Inc.
 .\" All rights reserved.
 .\"
 .\" This code is derived from software contributed to The NetBSD Foundation
@@ -28,7 +27,7 @@
 .\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 .\" POSSIBILITY OF SUCH DAMAGE.
 .\"
-.Dd December 13, 2011
+.Dd December 5, 2009
 .Dt PROP_DICTIONARY 3
 .Os
 .Sh NAME
@@ -52,11 +51,11 @@
 .Nm prop_dictionary_externalize ,
 .Nm prop_dictionary_internalize ,
 .Nm prop_dictionary_externalize_to_file ,
-.Nm prop_dictionary_externalize_to_zfile ,
 .Nm prop_dictionary_internalize_from_file ,
-.Nm prop_dictionary_internalize_from_zfile ,
+.Nm prop_dictionary_externalize_to_pref ,
+.Nm prop_dictionary_internalize_from_pref ,
 .Nm prop_dictionary_equals ,
-.Nm prop_dictionary_keysym_cstring_nocopy ,
+.Nm prop_dictionary_keysym_value ,
 .Nm prop_dictionary_keysym_equals
 .Nd dictionary property collection object
 .Sh LIBRARY
@@ -112,7 +111,7 @@
 .Fn prop_dictionary_equals "prop_dictionary_t dict1" "prop_dictionary_t dict2"
 .\"
 .Ft const char *
-.Fn prop_dictionary_keysym_cstring_nocopy "prop_dictionary_keysym_t sym"
+.Fn prop_dictionary_keysym_value "prop_dictionary_keysym_t sym"
 .\"
 .Ft bool
 .Fn prop_dictionary_keysym_equals "prop_dictionary_keysym_t keysym1" \
@@ -126,17 +125,19 @@
 .Ft bool
 .Fn prop_dictionary_externalize_to_file "prop_dictionary_t dict" \
     "const char *path"
-.Ft bool
-.Fn prop_dictionary_externalize_to_zfile "prop_dictionary_t dict" \
-    "const char *path"
 .Ft prop_dictionary_t
 .Fn prop_dictionary_internalize_from_file "const char *path"
-.Ft prop_dictionary_t
-.Fn prop_dictionary_internalize_from_zfile "const char *path"
+.\"
+.Ft bool
+.Fn prop_dictionary_externalize_to_pref "prop_dictionary_t dict" \
+    "struct plistref *pref"
+.Ft bool
+.Fn prop_dictionary_internalize_from_pref "const struct plistref *pref" \
+    "prop_dictionary_t *dictp"
 .\"
 .Sh DESCRIPTION
 The
-.Fn prop_dictionary
+.Nm
 family of functions operate on the dictionary property collection object type.
 A dictionary is an unordered set of objects stored as key-value pairs.
 .Bl -tag -width "xxxxx"
@@ -168,7 +169,8 @@ Like
 except the resulting dictionary is always mutable.
 .It Fn prop_dictionary_count "prop_dictionary_t dict"
 Returns the number of objects stored in the dictionary.
-.It Fn prop_dictionary_ensure_capacity "prop_dictionary_t dict"
+.It Fn prop_dictionary_ensure_capacity "prop_dictionary_t dict" \
+    "unsigned int capacity"
 Ensure that the dictionary has a total capacity of
 .Fa capacity ,
 including objects already stored in the dictionary.
@@ -271,8 +273,8 @@ Returns
 if the two dictionaries are equivalent.
 Note: Objects contained in the dictionary are compared by value, not by
 reference.
-.It Fn prop_dictionary_keysym_cstring_nocopy "prop_dictionary_keysym_t keysym"
-Returns an immutable reference to the dictionary key symbol's string value.
+.It Fn prop_dictionary_keysym_value "prop_dictionary_keysym_t keysym"
+Returns an reference to the dictionary key symbol's string value.
 .It Fn prop_dictionary_keysym_equals "prop_dictionary_keysym_t keysym1" \
     "prop_dictionary_keysym_t keysym2"
 Returns
@@ -312,14 +314,6 @@ and is written atomically.
 Returns
 .Dv false
 if externalizing or writing the dictionary fails for any reason.
-.It Fn prop_dictionary_externalize_to_zfile "prop_dictionary_t dict" \
-    "const char *path"
-Externalizes a dictionary, compresses the result and writes it to the
-file specified by
-.Fa path .
-The same rules than
-.Fn prop_dictionary_externalize_to_file
-can be applied.
 .It Fn prop_dictionary_internalize_from_file "const char *path"
 Reads the XML property list contained in the file specified by
 .Fa path ,
@@ -327,14 +321,21 @@ internalizes it, and returns the corresponding dictionary.
 Returns
 .Dv NULL
 on failure.
-.It Fn prop_dictionary_internalize_from_zfile "const char *path"
-Reads the XML propertly list contained in the compressed gzip file
-specified by
-.Fa path ,
-internalizes it, and returns the corresponding array.
+.It Fn prop_dictionary_externalize_to_pref "prop_dictionary_t dict" \
+    "struct plistref *pref"
+Externalizes a dictionary and packs it into the plistref specified by
+.Fa pref .
 Returns
-.Dv NULL
-on failure.
+.Dv false
+if externalizing the dictionary fails for any reason.
+.It Fn prop_dictionary_internalize_from_pref "const struct plistref *pref" \
+    "prop_dictionary_t *dictp"
+Reads the plistref specified by
+.Fa pref ,
+internalizes it, and returns the corresponding dictionary.
+Returns
+.Dv false
+if internalizing or writing the dictionary fails for any reason.
 .El
 .Sh SEE ALSO
 .Xr prop_array 3 ,
@@ -350,5 +351,3 @@ The
 .Xr proplib 3
 property container object library first appeared in
 .Nx 4.0 .
-Support for reading and writing from/to gzip compressed plist
-files was added by Juan Romero Pardines <xtraeme@gmail.com>.

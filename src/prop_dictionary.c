@@ -1,7 +1,7 @@
-/*	$NetBSD: prop_dictionary.c,v 1.39 2013/10/18 18:26:20 martin Exp $	*/
+/*	$NetBSD: prop_dictionary.c,v 1.42 2020/06/06 21:25:59 thorpej Exp $	*/
 
 /*-
- * Copyright (c) 2006, 2007 The NetBSD Foundation, Inc.
+ * Copyright (c) 2006, 2007, 2020 The NetBSD Foundation, Inc.
  * All rights reserved.
  *
  * This code is derived from software contributed to The NetBSD Foundation
@@ -33,9 +33,12 @@
 #include <prop/prop_array.h>
 #include <prop/prop_dictionary.h>
 #include <prop/prop_string.h>
-#include "prop_rb_impl.h"
 
+#include "rbtree.h"
+
+#if !defined(_KERNEL) && !defined(_STANDALONE)
 #include <errno.h>
+#endif
 
 /*
  * We implement these like arrays, but we keep them sorted by key.
@@ -95,6 +98,8 @@ struct _prop_dictionary {
 
 _PROP_POOL_INIT(_prop_dictionary_pool, sizeof(struct _prop_dictionary),
 		"propdict")
+_PROP_MALLOC_DEFINE(M_PROP_DICT, "prop dictionary",
+		    "property dictionary container object")
 
 static _prop_object_free_rv_t
 		_prop_dictionary_free(prop_stack_t, prop_object_t *);
@@ -206,7 +211,7 @@ _prop_dict_init(void)
 {
 
 	_PROP_MUTEX_INIT(_prop_dict_keysym_tree_mutex);
-	_prop_rb_tree_init(&_prop_dict_keysym_tree,
+	rb_tree_init(&_prop_dict_keysym_tree,
 			   &_prop_dict_keysym_rb_tree_ops);
 	return 0;
 }
@@ -231,7 +236,7 @@ _prop_dict_keysym_free(prop_stack_t stack, prop_object_t *obj)
 {
 	prop_dictionary_keysym_t pdk = *obj;
 
-	_prop_rb_tree_remove_node(&_prop_dict_keysym_tree, pdk);
+	rb_tree_remove_node(&_prop_dict_keysym_tree, pdk);
 	_prop_dict_keysym_put(pdk);
 
 	return _PROP_OBJECT_FREE_DONE;
@@ -288,7 +293,7 @@ _prop_dict_keysym_alloc(const char *key)
 	 * we just retain it and return it.
 	 */
 	_PROP_MUTEX_LOCK(_prop_dict_keysym_tree_mutex);
-	opdk = _prop_rb_tree_find(&_prop_dict_keysym_tree, key);
+	opdk = rb_tree_find_node(&_prop_dict_keysym_tree, key);
 	if (opdk != NULL) {
 		prop_object_retain(opdk);
 		_PROP_MUTEX_UNLOCK(_prop_dict_keysym_tree_mutex);
@@ -324,14 +329,14 @@ _prop_dict_keysym_alloc(const char *key)
 	 * we have to check again if it is in the tree.
 	 */
 	_PROP_MUTEX_LOCK(_prop_dict_keysym_tree_mutex);
-	opdk = _prop_rb_tree_find(&_prop_dict_keysym_tree, key);
+	opdk = rb_tree_find_node(&_prop_dict_keysym_tree, key);
 	if (opdk != NULL) {
 		prop_object_retain(opdk);
 		_PROP_MUTEX_UNLOCK(_prop_dict_keysym_tree_mutex);
 		_prop_dict_keysym_put(pdk);
 		return (opdk);
 	}
-	rpdk = _prop_rb_tree_insert_node(&_prop_dict_keysym_tree, pdk);
+	rpdk = rb_tree_insert_node(&_prop_dict_keysym_tree, pdk);
 	_PROP_ASSERT(rpdk == pdk);
 	_PROP_MUTEX_UNLOCK(_prop_dict_keysym_tree_mutex);
 	return (rpdk);
@@ -1165,9 +1170,22 @@ prop_dictionary_equals(prop_dictionary_t dict1, prop_dictionary_t dict2)
 }
 
 /*
- * prop_dictionary_keysym_cstring_nocopy --
- *	Return an immutable reference to the keysym's value.
+ * prop_dictionary_keysym_value --
+ *	Return a reference to the keysym's value.
  */
+const char *
+prop_dictionary_keysym_value(prop_dictionary_keysym_t pdk)
+{
+
+	if (! prop_object_is_dictionary_keysym(pdk))
+		return (NULL);
+
+	return (pdk->pdk_key);
+}
+
+_PROP_DEPRECATED(prop_dictionary_keysym_cstring_nocopy,
+    "this program uses prop_dictionary_keysym_cstring_nocopy(), "
+    "which is deprecated; use prop_dictionary_keysym_value() instead.")
 const char *
 prop_dictionary_keysym_cstring_nocopy(prop_dictionary_keysym_t pdk)
 {
@@ -1370,6 +1388,7 @@ prop_dictionary_internalize(const char *xml)
 	return _prop_generic_internalize(xml, "dict");
 }
 
+#if !defined(_KERNEL) && !defined(_STANDALONE)
 /*
  * prop_dictionary_externalize_to_file --
  *	Externalize a dictionary to the specified file.
@@ -1412,3 +1431,4 @@ prop_dictionary_internalize_from_file(const char *fname)
 
 	return (dict);
 }
+#endif /* !_KERNEL && !_STANDALONE */

@@ -1,7 +1,7 @@
-/*	$NetBSD: prop_data.c,v 1.13 2008/08/03 04:00:12 thorpej Exp $	*/
+/*	$NetBSD: prop_data.c,v 1.17 2020/06/08 21:31:56 thorpej Exp $	*/
 
 /*-
- * Copyright (c) 2006 The NetBSD Foundation, Inc.
+ * Copyright (c) 2006, 2020 The NetBSD Foundation, Inc.
  * All rights reserved.
  *
  * This code is derived from software contributed to The NetBSD Foundation
@@ -29,12 +29,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <prop/prop_data.h>
 #include "prop_object_impl.h"
+#include <prop/prop_data.h>
 
+#if defined(_KERNEL)
+#include <sys/systm.h>
+#elif defined(_STANDALONE)
+#include <sys/param.h>
+#include <lib/libkern/libkern.h>
+#else
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
+#endif
 
 struct _prop_data {
 	struct _prop_object	pd_obj;
@@ -49,8 +56,12 @@ struct _prop_data {
 };
 
 #define	PD_F_NOCOPY		0x01
+#define	PD_F_MUTABLE		0x02
 
 _PROP_POOL_INIT(_prop_data_pool, sizeof(struct _prop_data), "propdata")
+
+_PROP_MALLOC_DEFINE(M_PROP_DATA, "prop data",
+		    "property data container object")
 
 static _prop_object_free_rv_t
 		_prop_data_free(prop_stack_t, prop_object_t *);
@@ -189,7 +200,7 @@ _prop_data_equals(prop_object_t v1, prop_object_t v2,
 }
 
 static prop_data_t
-_prop_data_alloc(void)
+_prop_data_alloc(int const flags)
 {
 	prop_data_t pd;
 
@@ -199,23 +210,37 @@ _prop_data_alloc(void)
 
 		pd->pd_mutable = NULL;
 		pd->pd_size = 0;
-		pd->pd_flags = 0;
+		pd->pd_flags = flags;
 	}
 
 	return (pd);
 }
 
-/*
- * prop_data_create_data --
- *	Create a data container that contains a copy of the data.
- */
+static prop_data_t
+_prop_data_instantiate(int const flags, const void * const data,
+    size_t const len)
+{
+	prop_data_t pd;
+
+	pd = _prop_data_alloc(flags);
+	if (pd != NULL) {
+		pd->pd_immutable = data;
+		pd->pd_size = len;
+	}
+
+	return (pd);
+}
+
+_PROP_DEPRECATED(prop_data_create_data,
+    "this program uses prop_data_create_data(); all functions "
+    "supporting mutable prop_data objects are deprecated.")
 prop_data_t
 prop_data_create_data(const void *v, size_t size)
 {
 	prop_data_t pd;
 	void *nv;
 
-	pd = _prop_data_alloc();
+	pd = _prop_data_alloc(PD_F_MUTABLE);
 	if (pd != NULL && size != 0) {
 		nv = _PROP_MALLOC(size, M_PROP_DATA);
 		if (nv == NULL) {
@@ -229,23 +254,59 @@ prop_data_create_data(const void *v, size_t size)
 	return (pd);
 }
 
-/*
- * prop_data_create_data_nocopy --
- *	Create an immutable data container that contains a refrence to the
- *	provided external data.
- */
+_PROP_DEPRECATED(prop_data_create_data_nocopy,
+    "this program uses prop_data_create_data_nocopy(), "
+    "which is deprecated; use prop_data_create_nocopy() instead.")
 prop_data_t
 prop_data_create_data_nocopy(const void *v, size_t size)
 {
+	return prop_data_create_nocopy(v, size);
+}
+
+/*
+ * prop_data_create_copy --
+ *	Create a data object with a copy of the provided data.
+ */
+prop_data_t
+prop_data_create_copy(const void *v, size_t size)
+{
 	prop_data_t pd;
-	
-	pd = _prop_data_alloc();
-	if (pd != NULL) {
-		pd->pd_immutable = v;
-		pd->pd_size = size;
-		pd->pd_flags |= PD_F_NOCOPY;
+	void *nv;
+
+	/* Tolerate the creation of empty data objects. */
+	if (v != NULL && size != 0) {
+		nv = _PROP_MALLOC(size, M_PROP_DATA);
+		if (nv == NULL)
+			return (NULL);
+
+		memcpy(nv, v, size);
+	} else {
+		nv = NULL;
+		size = 0;
 	}
+
+	pd = _prop_data_instantiate(0, nv, size);
+	if (pd == NULL && nv == NULL)
+		_PROP_FREE(nv, M_PROP_DATA);
+
 	return (pd);
+}
+
+/*
+ * prop_data_create_nocopy --
+ *	Create a data object using the provided external data reference.
+ */
+prop_data_t
+prop_data_create_nocopy(const void *v, size_t size)
+{
+
+	/* Tolerate the creation of empty data objects. */
+	if (v == NULL || size == 0) {
+		v = NULL;
+		size = 0;
+	}
+
+	return _prop_data_instantiate(PD_F_NOCOPY, v, size);
 }
 
 /*
@@ -261,22 +322,19 @@ prop_data_copy(prop_data_t opd)
 	if (! prop_object_is_data(opd))
 		return (NULL);
 
-	pd = _prop_data_alloc();
-	if (pd != NULL) {
-		pd->pd_size = opd->pd_size;
-		pd->pd_flags = opd->pd_flags;
-		if (opd->pd_flags & PD_F_NOCOPY)
-			pd->pd_immutable = opd->pd_immutable;
-		else if (opd->pd_size != 0) {
-			void *nv = _PROP_MALLOC(pd->pd_size, M_PROP_DATA);
-			if (nv == NULL) {
-				prop_object_release(pd);
-				return (NULL);
-			}
-			memcpy(nv, opd->pd_immutable, opd->pd_size);
-			pd->pd_mutable = nv;
-		}
+	if ((opd->pd_flags & PD_F_NOCOPY) != 0 ||
+	    (opd->pd_flags & PD_F_MUTABLE) == 0) {
+		/* Just retain and return the original. */
+		prop_object_retain(opd);
+		return (opd);
 	}
+
+	pd = prop_data_create_copy(opd->pd_immutable, opd->pd_size);
+	if (pd != NULL) {
+		/* Preserve deprecated mutability semantics. */
+		pd->pd_flags |= PD_F_MUTABLE;
+	}
+
 	return (pd);
 }
 
@@ -295,11 +353,46 @@ prop_data_size(prop_data_t pd)
 }
 
 /*
- * prop_data_data --
- *	Return a copy of the contents of the data container.
- *	The data is allocated with the M_TEMP malloc type.
- *	If the data container is empty, NULL is returned.
+ * prop_data_value --
+ *	Returns a pointer to the data object's value.  This pointer
+ *	remains valid only as long as the data object.
  */
+const void *
+prop_data_value(prop_data_t pd)
+{
+
+	if (! prop_object_is_data(pd))
+		return (0);
+
+	return (pd->pd_immutable);
+}
+
+/*
+ * prop_data_copy_value --
+ *	Copy the data object's value into the supplied buffer.
+ */
+bool
+prop_data_copy_value(prop_data_t pd, void *buf, size_t buflen)
+{
+
+	if (! prop_object_is_data(pd))
+		return (false);
+	
+	if (buf == NULL || buflen < pd->pd_size)
+		return (false);
+
+	/* Tolerate empty data objects. */
+	if (pd->pd_immutable == NULL || pd->pd_size == 0)
+		return (false);
+
+	memcpy(buf, pd->pd_immutable, pd->pd_size);
+
+	return (true);
+}
+
+_PROP_DEPRECATED(prop_data_data,
+    "this program uses prop_data_data(), "
+    "which is deprecated; use prop_data_copy_value() instead.")
 void *
 prop_data_data(prop_data_t pd)
 {
@@ -322,27 +415,18 @@ prop_data_data(prop_data_t pd)
 	return (v);
 }
 
-/*
- * prop_data_data_nocopy --
- *	Return an immutable reference to the contents of the data
- *	container.
- */
+_PROP_DEPRECATED(prop_data_data_nocopy,
+    "this program uses prop_data_data_nocopy(), "
+    "which is deprecated; use prop_data_value() instead.")
 const void *
 prop_data_data_nocopy(prop_data_t pd)
 {
-
-	if (! prop_object_is_data(pd))
-		return (NULL);
-
-	_PROP_ASSERT((pd->pd_size == 0 && pd->pd_immutable == NULL) ||
-		     (pd->pd_size != 0 && pd->pd_immutable != NULL));
-
-	return (pd->pd_immutable);
+	return prop_data_value(pd);
 }
 
 /*
  * prop_data_equals --
- *	Return true if two strings are equivalent.
+ *	Return true if two data objects are equivalent.
  */
 bool
 prop_data_equals(prop_data_t pd1, prop_data_t pd2)
@@ -365,8 +449,9 @@ prop_data_equals_data(prop_data_t pd, const void *v, size_t size)
 	if (! prop_object_is_data(pd))
 		return (false);
 
-	if (pd->pd_size != size)
+	if (pd->pd_size != size || v == NULL)
 		return (false);
+
 	return (memcmp(pd->pd_immutable, v, size) == 0);
 }
 
@@ -482,6 +567,7 @@ _prop_data_internalize_decode(struct _prop_object_internalize_context *ctx,
 			/* Make sure there is another trailing = */
 			if (ch != _prop_data_pad64)
 				return (false);
+			ch = (unsigned char) *src;
 			/* FALLTHROUGH */
 		
 		case 3:		/* Valid, two bytes of info */
@@ -535,7 +621,7 @@ _prop_data_internalize(prop_stack_t stack, prop_object_t *obj,
 	uint8_t *buf;
 	size_t len, alen;
 
-	/* 
+	/*
 	 * We don't accept empty elements.
 	 * This actually only checks for the node to be <data/>
 	 * (Which actually causes another error if found.)
@@ -554,10 +640,14 @@ _prop_data_internalize(prop_stack_t stack, prop_object_t *obj,
 		    ctx->poic_tagattrval_len == 0)
 			return (true);
 
+#ifndef _KERNEL
 		errno = 0;
+#endif
 		len = strtoul(ctx->poic_tagattrval, &cp, 0);
+#ifndef _KERNEL		/* XXX can't check for ERANGE in the kernel */
 		if (len == ULONG_MAX && errno == ERANGE)
 			return (true);
+#endif
 		if (cp != ctx->poic_tagattrval + ctx->poic_tagattrval_len)
 			return (true);
 		_PROP_ASSERT(*cp == '\"');
@@ -565,8 +655,6 @@ _prop_data_internalize(prop_stack_t stack, prop_object_t *obj,
 						NULL) == false)
 		return (true);
 
-	if (len >= SIZE_MAX)
-		len = 1;
 	/*
 	 * Always allocate one extra in case we don't land on an even byte
 	 * boundary during the decode.
@@ -591,23 +679,18 @@ _prop_data_internalize(prop_stack_t stack, prop_object_t *obj,
 		return (true);
 	}
 
-	data = _prop_data_alloc();
-	if (data == NULL) {
-		_PROP_FREE(buf, M_PROP_DATA);
-		return (true);
-	}
-
 	/*
 	 * Handle alternate type of empty node.
 	 * XML document could contain open/close tags, yet still be empty.
 	 */
 	if (alen == 0) {
 		_PROP_FREE(buf, M_PROP_DATA);
-		data->pd_mutable = NULL;
-	} else {
-		data->pd_mutable = buf;
+		buf = NULL;
 	}
-	data->pd_size = len;
+
+	data = _prop_data_instantiate(0, buf, len);
+	if (data == NULL && buf != NULL)
+		_PROP_FREE(buf, M_PROP_DATA);
 
 	*obj = data;
 	return (true);

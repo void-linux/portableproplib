@@ -289,6 +289,7 @@ struct _prop_object_iterator {
 #ifndef HAVE_ATOMICS /* NO ATOMIC SUPPORT, USE A MUTEX */
 
 #define _PROP_NEED_REFCNT_MTX
+#define _PROP_ATOMIC_LOAD(x)		*(x)
 #define _PROP_ATOMIC_INC32(x) \
 	do { \
 		pthread_mutex_lock(&_prop_refcnt_mtx); \
@@ -316,6 +317,7 @@ struct _prop_object_iterator {
 
 #else /* GCC ATOMIC BUILTINS */
 
+#define _PROP_ATOMIC_LOAD(x)		*(x)
 #define _PROP_ATOMIC_INC32(x)						\
 do {									\
 	(void)__sync_fetch_and_add(x, 1);				\
@@ -342,5 +344,16 @@ do {									\
  * Language features.
  */
 #define	_PROP_ARG_UNUSED		__attribute__((unused))
+#ifndef __warn_references
+#define	__warn_references(sym,msg)					\
+	__asm(".pushsection .gnu.warning." #sym "\n"			\
+	".ascii \"" msg "\"\n"						\
+	".popsection");
+#endif
+#if defined(__clang__)
+#define _PROP_DEPRECATED(s, m)		/* delete */
+#else
+#define _PROP_DEPRECATED(s, m)          __warn_references(s, m)
+#endif
 
 #endif /* _PROPLIB_PROP_OBJECT_IMPL_H_ */

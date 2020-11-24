@@ -4,7 +4,7 @@ MANDIR ?= share/man
 CC ?= cc
 AR ?= ar
 RANLIB ?= ranlib
-CCFLAGS += -I./include -I./src -Wno-error=unused-function
+CCFLAGS += -I./include -I./src -Wno-unused-function
 CCFLAGS += -DHAVE_FDATASYNC -DHAVE_ATOMICS -DHAVE_VISIBILITY
 CCFLAGS += -D_XOPEN_SOURCE=700 -D_DEFAULT_SOURCE
 CCFLAGS += -O2 -Wall -Werror -g -pipe -pthread -fPIC
@@ -16,7 +16,7 @@ MANS = $(shell find man -type f -name '*.3')
 
 MAJORVER = 0
 MINORVER = 6
-MICROVER = 9
+MICROVER = 10
 VERSION = $(MAJORVER).$(MINORVER).$(MICROVER)
 SHLIB = libprop.so.$(VERSION)
 LDFLAGS += -shared -Wl,-soname,libprop.so.$(MAJORVER)

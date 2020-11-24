@@ -1,7 +1,7 @@
-/*	$NetBSD: prop_string.h,v 1.3 2008/04/28 20:22:51 martin Exp $	*/
+/*	$NetBSD: prop_string.h,v 1.4 2020/06/06 21:25:59 thorpej Exp $	*/
 
 /*-
- * Copyright (c) 2006 The NetBSD Foundation, Inc.
+ * Copyright (c) 2006, 2020 The NetBSD Foundation, Inc.
  * All rights reserved.
  *
  * This code is derived from software contributed to The NetBSD Foundation
@@ -36,30 +36,48 @@
 #include <prop/prop_object.h>
 #include <sys/types.h>
 
+#ifndef __printflike
+# define __printflike(n, m)	__attribute__((format(printf,n,m)))
+#endif
+
 typedef struct _prop_string *prop_string_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+prop_string_t	prop_string_create_format(const char *, ...) __printflike(1, 2);
+prop_string_t	prop_string_create_copy(const char *);
+prop_string_t	prop_string_create_nocopy(const char *);
+
+prop_string_t	prop_string_copy(prop_string_t);
+bool		prop_string_copy_value(prop_string_t, void *, size_t);
+
+size_t		prop_string_size(prop_string_t);
+const char *	prop_string_value(prop_string_t);
+
+bool		prop_string_equals(prop_string_t, prop_string_t);
+bool		prop_string_equals_string(prop_string_t, const char *);
+int		prop_string_compare(prop_string_t, prop_string_t);
+int		prop_string_compare_string(prop_string_t, const char *);
+
+
+/* Deprecated functions. */
 prop_string_t	prop_string_create(void);
 prop_string_t	prop_string_create_cstring(const char *);
 prop_string_t	prop_string_create_cstring_nocopy(const char *);
 
-prop_string_t	prop_string_copy(prop_string_t);
 prop_string_t	prop_string_copy_mutable(prop_string_t);
-
-size_t		prop_string_size(prop_string_t);
-bool		prop_string_mutable(prop_string_t);
 
 char *		prop_string_cstring(prop_string_t);
 const char *	prop_string_cstring_nocopy(prop_string_t);
 
+bool		prop_string_mutable(prop_string_t);
+
+bool		prop_string_equals_cstring(prop_string_t, const char *);
+
 bool		prop_string_append(prop_string_t, prop_string_t);
 bool		prop_string_append_cstring(prop_string_t, const char *);
-
-bool		prop_string_equals(prop_string_t, prop_string_t);
-bool		prop_string_equals_cstring(prop_string_t, const char *);
 
 #ifdef __cplusplus
 }

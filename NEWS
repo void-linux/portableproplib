@@ -1,3 +1,9 @@
+0.6.10
+------
+* Synchronized with NetBSD HEAD; new immutable API by thorpej.
+* Get rid of prop_rb_impl.h.
+* Respect custom CFLAGS passed in to make(1).
+
 0.6.9
 -----
 * Get rid of GNU autoconf/automake/libtool/pkg-config.
